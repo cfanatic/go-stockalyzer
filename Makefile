@@ -1,11 +1,11 @@
 build:
-	go build
+	go build -o bin/go-stockalyzer
 
 deploy:
-	@go build
-	@./go-stockalyzer
+	@go build -o bin/go-stockalyzer
+	@./bin/go-stockalyzer
 
 clean:
-	rm go-stockalyzer
+	rm bin/go-stockalyzer
 
 all: deploy
