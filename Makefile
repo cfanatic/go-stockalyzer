@@ -1,8 +1,8 @@
 build:
-	go build -o bin/go-stockalyzer
+	go build -o bin/go-stockalyzer cmd/main.go
 
 deploy:
-	@go build -o bin/go-stockalyzer
+	@go build -o bin/go-stockalyzer cmd/main.go
 	@./bin/go-stockalyzer
 
 clean:
