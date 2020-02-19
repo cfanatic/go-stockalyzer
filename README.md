@@ -20,3 +20,9 @@ make build
 ```
 
 ## Usage
+
+Run the application:
+
+```bash
+./bin/stockalyzer
+```
