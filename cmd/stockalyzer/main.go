@@ -1,14 +1,16 @@
 package main
 
 import (
-	"github.com/cfanatic/stockalyzer"
-	"github.com/cfanatic/stockalyzer/database"
 	"github.com/cfanatic/stockalyzer/finance"
 )
 
+const (
+	FINNHUB_KEY = ""
+)
+
 func main() {
-	stockalyzer.New()
-	database.New("address", "database", "collection")
-	finance.NewFinnhub()
-	finance.NewYahoo()
+	var stock finance.IFinance
+
+	stock = finance.NewFinnhub(FINNHUB_KEY)
+	stock.Print()
 }
