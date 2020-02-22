@@ -1,2 +1,16 @@
 github.com/cfanatic/go-stockalyzer v0.0.0-20200212184406-d22ded90db91 h1:ODpiqJeE90uwTxSzcFPg+mJoy9xANuAwQ66ohlkePDE=
 github.com/cfanatic/go-stockalyzer v0.0.0-20200212184406-d22ded90db91/go.mod h1:Zsbp4k4/aOUZzJofZMUi+v7eoyoomp/64Pzc6co3LRc=
+github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
+github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/m1/go-finnhub v0.0.0-20200114195759-d34d2576b76f h1:Qh7IkZH32QUXqeAUQh76Bc9/IfNJPtEzTz9pAAEspv0=
+github.com/m1/go-finnhub v0.0.0-20200114195759-d34d2576b76f/go.mod h1:+JYfekzUyr6BDbweDnHDg+qQcFP7/+TT9fSfHNK1n0I=
+github.com/m1/go-finnhub v0.0.0-20200201145322-d873edaeab2c h1:KcIFsL1ir8jwkapUAp4IzD65wAKrHld5Aapmheo0utU=
+github.com/m1/go-finnhub v0.0.0-20200201145322-d873edaeab2c/go.mod h1:+JYfekzUyr6BDbweDnHDg+qQcFP7/+TT9fSfHNK1n0I=
+github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
+github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
+github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
+gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
+gopkg.in/yaml.v2 v2.2.2 h1:ZCJp+EgiOT7lHqUV2J862kp8Qj64Jo6az82+3Td9dZw=
+gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=
