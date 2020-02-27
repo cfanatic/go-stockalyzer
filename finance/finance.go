@@ -2,8 +2,14 @@ package finance
 
 import "github.com/m1/go-finnhub"
 
+type Company = finnhub.Company
+type Candle = finnhub.Candle
+type Quote = finnhub.Quote
+
 type IFinance interface {
-	Profile(symbol string) *finnhub.Company
-	Candle(symbol string) *finnhub.Candle
-	Quote(symbol string) *finnhub.Quote
+	GetProfile(symbol string) *Company
+	GetQuote(symbol string) *Quote
+	GetCandle(symbol, from, to string) *Candle
+
+	GetError() error
 }

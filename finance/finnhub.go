@@ -8,40 +8,41 @@ import (
 )
 
 type Finnhub struct {
-	cli client.Client
-	err error
+	Client client.Client
+	Error  error
 }
 
 func NewFinnhub(key string) *Finnhub {
-	cli := client.New(key)
-	return &Finnhub{cli: *cli}
+	c := client.New(key)
+	return &Finnhub{Client: *c, Error: nil}
 }
 
-func (fh *Finnhub) Profile(symbol string) *finnhub.Company {
-	var profile *finnhub.Company
-	profile, fh.err = fh.cli.Stock.GetProfile(symbol)
-	return profile
+func (fh *Finnhub) GetProfile(symbol string) *Company {
+	var p *Company
+	p, fh.Error = fh.Client.Stock.GetProfile(symbol)
+	return p
 }
 
-func (fh *Finnhub) Candle(symbol string) *finnhub.Candle {
-	var candle *finnhub.Candle
+func (fh *Finnhub) GetQuote(symbol string) *Quote {
+	var q *Quote
+	q, fh.Error = fh.Client.Stock.GetQuote(symbol)
+	return q
+}
 
-	// count := finnhub.CandleDefaultCount
-	layout := "01/02/2006 3:04:05 PM"
-	from, _ := time.Parse(layout, "02/21/2020 07:00:00 AM")
-	to, _ := time.Parse(layout, "02/21/2020 09:00:00 PM")
-
+func (fh *Finnhub) GetCandle(symbol, from, to string) *Candle {
+	var c *Candle
+	layout := "2006-01-02 15:04:05"
+	t1, _ := time.Parse(layout, from)
+	t2, _ := time.Parse(layout, to)
 	param := &finnhub.CandleParams{
 		Count: nil,
-		From:  &from,
-		To:    &to,
+		From:  &t1,
+		To:    &t2,
 	}
-	candle, fh.err = fh.cli.Stock.GetCandle(symbol, finnhub.CandleResolutionSecond, param)
-	return candle
+	c, fh.Error = fh.Client.Stock.GetCandle(symbol, finnhub.CandleResolutionSecond, param)
+	return c
 }
 
-func (fh *Finnhub) Quote(symbol string) *finnhub.Quote {
-	var quote *finnhub.Quote
-	quote, fh.err = fh.cli.Stock.GetQuote(symbol)
-	return quote
+func (fh *Finnhub) GetError() error {
+	return fh.Error
 }
