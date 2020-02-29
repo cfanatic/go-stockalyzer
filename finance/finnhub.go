@@ -9,23 +9,32 @@ import (
 
 type Finnhub struct {
 	Client client.Client
+	Name   string
 	Error  error
 }
 
 func NewFinnhub(key string) *Finnhub {
 	c := client.New(key)
-	return &Finnhub{Client: *c, Error: nil}
+	return &Finnhub{Client: *c, Name: "", Error: nil}
 }
 
 func (fh *Finnhub) GetProfile(symbol string) *Company {
 	var p *Company
-	p, fh.Error = fh.Client.Stock.GetProfile(symbol)
+	if p, fh.Error = fh.Client.Stock.GetProfile(symbol); fh.Error == nil {
+		fh.Name = symbol
+	} else {
+		fh.Name = ""
+	}
 	return p
 }
 
 func (fh *Finnhub) GetQuote(symbol string) *Quote {
 	var q *Quote
-	q, fh.Error = fh.Client.Stock.GetQuote(symbol)
+	if q, fh.Error = fh.Client.Stock.GetQuote(symbol); fh.Error == nil {
+		fh.Name = symbol
+	} else {
+		fh.Name = ""
+	}
 	return q
 }
 
@@ -39,8 +48,16 @@ func (fh *Finnhub) GetCandle(symbol, from, to string) *Candle {
 		From:  &t1,
 		To:    &t2,
 	}
-	c, fh.Error = fh.Client.Stock.GetCandle(symbol, finnhub.CandleResolutionSecond, param)
+	if c, fh.Error = fh.Client.Stock.GetCandle(symbol, finnhub.CandleResolutionSecond, param); fh.Error == nil {
+		fh.Name = symbol
+	} else {
+		fh.Name = ""
+	}
 	return c
+}
+
+func (fh *Finnhub) GetName() string {
+	return fh.Name
 }
 
 func (fh *Finnhub) GetError() error {

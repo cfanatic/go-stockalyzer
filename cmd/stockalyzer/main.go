@@ -29,8 +29,8 @@ func main() {
 		panic(err)
 	}
 
-	priceSeries := chart.TimeSeries{
-		Name: "SPY",
+	quotes := chart.TimeSeries{
+		Name: stock.GetName(),
 		Style: chart.Style{
 			StrokeColor: chart.GetDefaultColor(0),
 		},
@@ -50,8 +50,12 @@ func main() {
 			// },
 		},
 		Series: []chart.Series{
-			priceSeries,
+			quotes,
 		},
+	}
+
+	graph.Elements = []chart.Renderable{
+		chart.Legend(&graph),
 	}
 
 	f, _ := os.Create("bin/output.png")

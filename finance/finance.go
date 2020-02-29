@@ -11,5 +11,6 @@ type IFinance interface {
 	GetQuote(symbol string) *Quote
 	GetCandle(symbol, from, to string) *Candle
 
+	GetName() string
 	GetError() error
 }
