@@ -8,32 +8,32 @@ import (
 )
 
 type Finnhub struct {
-	Client client.Client
-	Name   string
-	Error  error
+	client client.Client
+	name   string
+	err    error
 }
 
 func NewFinnhub(key string) *Finnhub {
 	c := client.New(key)
-	return &Finnhub{Client: *c, Name: "", Error: nil}
+	return &Finnhub{client: *c, name: "", err: nil}
 }
 
 func (fh *Finnhub) GetProfile(symbol string) *Company {
 	var p *Company
-	if p, fh.Error = fh.Client.Stock.GetProfile(symbol); fh.Error == nil {
-		fh.Name = symbol
+	if p, fh.err = fh.client.Stock.GetProfile(symbol); fh.err == nil {
+		fh.name = symbol
 	} else {
-		fh.Name = ""
+		fh.name = ""
 	}
 	return p
 }
 
 func (fh *Finnhub) GetQuote(symbol string) *Quote {
 	var q *Quote
-	if q, fh.Error = fh.Client.Stock.GetQuote(symbol); fh.Error == nil {
-		fh.Name = symbol
+	if q, fh.err = fh.client.Stock.GetQuote(symbol); fh.err == nil {
+		fh.name = symbol
 	} else {
-		fh.Name = ""
+		fh.name = ""
 	}
 	return q
 }
@@ -48,18 +48,18 @@ func (fh *Finnhub) GetCandle(symbol, from, to string) *Candle {
 		From:  &t1,
 		To:    &t2,
 	}
-	if c, fh.Error = fh.Client.Stock.GetCandle(symbol, finnhub.CandleResolutionSecond, param); fh.Error == nil {
-		fh.Name = symbol
+	if c, fh.err = fh.client.Stock.GetCandle(symbol, finnhub.CandleResolutionSecond, param); fh.err == nil {
+		fh.name = symbol
 	} else {
-		fh.Name = ""
+		fh.name = ""
 	}
 	return c
 }
 
 func (fh *Finnhub) GetName() string {
-	return fh.Name
+	return fh.name
 }
 
 func (fh *Finnhub) GetError() error {
-	return fh.Error
+	return fh.err
 }
