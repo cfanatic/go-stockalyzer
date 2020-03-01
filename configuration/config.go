@@ -6,11 +6,11 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-type list int
+type keys int
 
 const (
-	CONFIG             = "cmd/stockalyzer/config.toml"
-	FINNHUB_TOKEN list = iota
+	PATH               = "cmd/stockalyzer/config.toml"
+	FINNHUB_TOKEN keys = iota
 )
 
 type config struct {
@@ -21,9 +21,9 @@ type finnhub struct {
 	Token string
 }
 
-func Get(key list) interface{} {
+func Get(key keys) interface{} {
 	var conf config
-	path, _ := filepath.Abs(CONFIG)
+	path, _ := filepath.Abs(PATH)
 	if _, err := toml.DecodeFile(path, &conf); err != nil {
 		panic(err)
 	}
