@@ -9,7 +9,7 @@ import (
 type list int
 
 const (
-	CONFIG             = "misc/config.toml"
+	CONFIG             = "cmd/stockalyzer/config.toml"
 	FINNHUB_TOKEN list = iota
 )
 
