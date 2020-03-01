@@ -13,8 +13,6 @@ type IFinance interface {
 	GetQuote() *Quote
 	GetCandle(from, to string) *Candle
 
-	GetError() error
-
 	Ticker() *string
 	XValues() *[]time.Time
 	YValues() *[]float64
@@ -56,49 +54,41 @@ type Candle struct {
 }
 
 func Plot(stock IFinance) {
-	if err := stock.GetError(); err == nil {
-		quotes := chart.TimeSeries{
-			Name: *stock.Ticker(),
-			Style: chart.Style{
-				StrokeColor: chart.GetDefaultColor(0),
-			},
-			XValues: *stock.XValues(),
-			YValues: *stock.YValues(),
-		}
-
-		graph := chart.Chart{
-			XAxis: chart.XAxis{
-				ValueFormatter: chart.TimeHourValueFormatter,
-				TickPosition:   chart.TickPositionBetweenTicks,
-			},
-			// YAxis: chart.YAxis{
-			// 	Range: &chart.ContinuousRange{},
-			// },
-			Series: []chart.Series{
-				quotes,
-			},
-		}
-
-		graph.Elements = []chart.Renderable{
-			chart.Legend(&graph),
-		}
-
-		f, _ := os.Create("bin/output.png")
-		defer f.Close()
-		graph.Render(chart.PNG, f)
-	} else {
-		panic(err)
+	quotes := chart.TimeSeries{
+		Name: *stock.Ticker(),
+		Style: chart.Style{
+			StrokeColor: chart.GetDefaultColor(0),
+		},
+		XValues: *stock.XValues(),
+		YValues: *stock.YValues(),
 	}
+
+	graph := chart.Chart{
+		XAxis: chart.XAxis{
+			ValueFormatter: chart.TimeHourValueFormatter,
+			TickPosition:   chart.TickPositionBetweenTicks,
+		},
+		// YAxis: chart.YAxis{
+		// 	Range: &chart.ContinuousRange{},
+		// },
+		Series: []chart.Series{
+			quotes,
+		},
+	}
+
+	graph.Elements = []chart.Renderable{
+		chart.Legend(&graph),
+	}
+
+	f, _ := os.Create("bin/output.png")
+	defer f.Close()
+	graph.Render(chart.PNG, f)
 }
 
 func Print(stock IFinance) {
-	if err := stock.GetError(); err == nil {
-		time := *stock.XValues()
-		price := *stock.YValues()
-		for i := range time {
-			fmt.Printf("%3d | %+v | %+v | %v\n", i, time[i].Unix(), time[i], price[i])
-		}
-	} else {
-		panic(err)
+	time := *stock.XValues()
+	price := *stock.YValues()
+	for i := range time {
+		fmt.Printf("%3d | %+v | %+v | %v\n", i, time[i].Unix(), time[i], price[i])
 	}
 }

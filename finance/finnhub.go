@@ -79,18 +79,23 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 	return &c
 }
 
-func (fh *Finnhub) GetError() error {
-	return fh.err
-}
-
 func (fh *Finnhub) Ticker() *string {
+	if fh.err != nil {
+		panic(fh.err)
+	}
 	return &fh.Finance.Ticker
 }
 
 func (fh *Finnhub) XValues() *[]time.Time {
+	if fh.err != nil {
+		panic(fh.err)
+	}
 	return &fh.Finance.Candle.Times
 }
 
 func (fh *Finnhub) YValues() *[]float64 {
+	if fh.err != nil {
+		panic(fh.err)
+	}
 	return &fh.Finance.Candle.Open
 }
