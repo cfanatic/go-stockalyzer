@@ -6,6 +6,7 @@ deploy:
 	@./bin/stockalyzer
 
 clean:
-	rm bin/stockalyzer
+	rm -f bin/stockalyzer
+	rm -f bin/output.png
 
 all: deploy
