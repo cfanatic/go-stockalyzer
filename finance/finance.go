@@ -1,6 +1,7 @@
 package finance
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -15,8 +16,8 @@ type IFinance interface {
 	GetError() error
 
 	Ticker() *string
-	XRange() *[]time.Time
-	YRange() *[]float64
+	XValues() *[]time.Time
+	YValues() *[]float64
 }
 
 type Finance struct {
@@ -60,8 +61,8 @@ func Plot(stock IFinance) {
 		Style: chart.Style{
 			StrokeColor: chart.GetDefaultColor(0),
 		},
-		XValues: *stock.XRange(),
-		YValues: *stock.YRange(),
+		XValues: *stock.XValues(),
+		YValues: *stock.YValues(),
 	}
 
 	graph := chart.Chart{
@@ -86,5 +87,14 @@ func Plot(stock IFinance) {
 	graph.Render(chart.PNG, f)
 }
 
-func Print() {
+func Print(stock IFinance) {
+	if err := stock.GetError(); err == nil {
+		time := *stock.XValues()
+		price := *stock.YValues()
+		for i := range time {
+			fmt.Printf("%3d | %+v | %+v | %v\n", i, time[i].Unix(), time[i], price[i])
+		}
+	} else {
+		panic(err)
+	}
 }

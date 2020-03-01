@@ -87,10 +87,10 @@ func (fh *Finnhub) Ticker() *string {
 	return &fh.Finance.Ticker
 }
 
-func (fh *Finnhub) XRange() *[]time.Time {
+func (fh *Finnhub) XValues() *[]time.Time {
 	return &fh.Finance.Candle.Times
 }
 
-func (fh *Finnhub) YRange() *[]float64 {
+func (fh *Finnhub) YValues() *[]float64 {
 	return &fh.Finance.Candle.Open
 }
