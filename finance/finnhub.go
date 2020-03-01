@@ -7,39 +7,55 @@ import (
 	"github.com/m1/go-finnhub/client"
 )
 
+const (
+	FINNHUB_KEY = ""
+)
+
 type Finnhub struct {
-	client client.Client
-	name   string
-	err    error
+	Finance Finance
+	client  client.Client
+	err     error
 }
 
-func NewFinnhub(key string) *Finnhub {
-	c := client.New(key)
-	return &Finnhub{client: *c, name: "", err: nil}
+func NewFinnhub(symbol string) *Finnhub {
+	c := client.New(FINNHUB_KEY)
+	return &Finnhub{client: *c, Finance: Finance{Ticker: symbol}, err: nil}
 }
 
-func (fh *Finnhub) GetProfile(symbol string) *Company {
-	var p *Company
-	if p, fh.err = fh.client.Stock.GetProfile(symbol); fh.err == nil {
-		fh.name = symbol
+func (fh *Finnhub) GetProfile() *Profile {
+	p := Profile{}
+	if profile, err := fh.client.Stock.GetProfile(fh.Finance.Ticker); err == nil {
+		p.Country = profile.Country
+		p.Currency = profile.Currency
+		p.Description = profile.Description
+		p.Exchange = profile.Exchange
+		p.GICSIndustry = profile.GICSIndustry
+		p.GICSSector = profile.GICSSector
+		p.ISIN = profile.ISIN
+		p.Name = profile.Name
+		fh.Finance.Profile = p
 	} else {
-		fh.name = ""
+		fh.err = err
 	}
-	return p
+	return &p
 }
 
-func (fh *Finnhub) GetQuote(symbol string) *Quote {
-	var q *Quote
-	if q, fh.err = fh.client.Stock.GetQuote(symbol); fh.err == nil {
-		fh.name = symbol
+func (fh *Finnhub) GetQuote() *Quote {
+	q := Quote{}
+	if quote, err := fh.client.Stock.GetQuote(fh.Finance.Ticker); err == nil {
+		q.Open = quote.Open
+		q.High = quote.High
+		q.Low = quote.Low
+		q.Current = quote.Current
+		q.PrevClose = quote.PreviousClose
 	} else {
-		fh.name = ""
+		fh.err = err
 	}
-	return q
+	return &q
 }
 
-func (fh *Finnhub) GetCandle(symbol, from, to string) *Candle {
-	var c *Candle
+func (fh *Finnhub) GetCandle(from, to string) *Candle {
+	c := Candle{}
 	layout := "2006-01-02 15:04:05"
 	t1, _ := time.Parse(layout, from)
 	t2, _ := time.Parse(layout, to)
@@ -48,16 +64,17 @@ func (fh *Finnhub) GetCandle(symbol, from, to string) *Candle {
 		From:  &t1,
 		To:    &t2,
 	}
-	if c, fh.err = fh.client.Stock.GetCandle(symbol, finnhub.CandleResolutionSecond, param); fh.err == nil {
-		fh.name = symbol
+	if candle, err := fh.client.Stock.GetCandle(fh.Finance.Ticker, finnhub.CandleResolutionSecond, param); err == nil {
+		c.Close = candle.Close
+		c.High = candle.High
+		c.Low = candle.Low
+		c.Open = candle.Open
+		c.Times = candle.Times
+		c.Volume = candle.Volume
 	} else {
-		fh.name = ""
+		fh.err = err
 	}
-	return c
-}
-
-func (fh *Finnhub) GetName() string {
-	return fh.name
+	return &c
 }
 
 func (fh *Finnhub) GetError() error {
