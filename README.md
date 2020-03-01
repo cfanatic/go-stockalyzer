@@ -21,6 +21,8 @@ make build
 
 ## Usage
 
+Update the configuration parameters in `cmd/stockalyzer/config.toml`.
+
 Run the application:
 
 ```bash
