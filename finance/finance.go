@@ -56,35 +56,39 @@ type Candle struct {
 }
 
 func Plot(stock IFinance) {
-	quotes := chart.TimeSeries{
-		Name: *stock.Ticker(),
-		Style: chart.Style{
-			StrokeColor: chart.GetDefaultColor(0),
-		},
-		XValues: *stock.XValues(),
-		YValues: *stock.YValues(),
-	}
+	if err := stock.GetError(); err == nil {
+		quotes := chart.TimeSeries{
+			Name: *stock.Ticker(),
+			Style: chart.Style{
+				StrokeColor: chart.GetDefaultColor(0),
+			},
+			XValues: *stock.XValues(),
+			YValues: *stock.YValues(),
+		}
 
-	graph := chart.Chart{
-		XAxis: chart.XAxis{
-			ValueFormatter: chart.TimeHourValueFormatter,
-			TickPosition:   chart.TickPositionBetweenTicks,
-		},
-		// YAxis: chart.YAxis{
-		// 	Range: &chart.ContinuousRange{},
-		// },
-		Series: []chart.Series{
-			quotes,
-		},
-	}
+		graph := chart.Chart{
+			XAxis: chart.XAxis{
+				ValueFormatter: chart.TimeHourValueFormatter,
+				TickPosition:   chart.TickPositionBetweenTicks,
+			},
+			// YAxis: chart.YAxis{
+			// 	Range: &chart.ContinuousRange{},
+			// },
+			Series: []chart.Series{
+				quotes,
+			},
+		}
 
-	graph.Elements = []chart.Renderable{
-		chart.Legend(&graph),
-	}
+		graph.Elements = []chart.Renderable{
+			chart.Legend(&graph),
+		}
 
-	f, _ := os.Create("bin/output.png")
-	defer f.Close()
-	graph.Render(chart.PNG, f)
+		f, _ := os.Create("bin/output.png")
+		defer f.Close()
+		graph.Render(chart.PNG, f)
+	} else {
+		panic(err)
+	}
 }
 
 func Print(stock IFinance) {
