@@ -3,6 +3,7 @@ module github.com/cfanatic/stockalyzer
 go 1.13
 
 require (
+	github.com/BurntSushi/toml v0.3.1
 	github.com/blend/go-sdk v2.0.0+incompatible // indirect
 	github.com/cfanatic/go-stockalyzer v0.0.0-20200212184406-d22ded90db91
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect

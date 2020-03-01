@@ -3,12 +3,10 @@ package finance
 import (
 	"time"
 
+	"github.com/cfanatic/stockalyzer/configuration"
+
 	"github.com/m1/go-finnhub"
 	"github.com/m1/go-finnhub/client"
-)
-
-const (
-	FINNHUB_KEY = ""
 )
 
 type Finnhub struct {
@@ -18,7 +16,9 @@ type Finnhub struct {
 }
 
 func NewFinnhub(symbol string) *Finnhub {
-	c := client.New(FINNHUB_KEY)
+	key := configuration.FINNHUB_TOKEN
+	token := configuration.Get(key).(string)
+	c := client.New(token)
 	return &Finnhub{client: *c, Finance: Finance{Ticker: symbol}, err: nil}
 }
 
