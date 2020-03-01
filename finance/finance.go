@@ -13,13 +13,17 @@ type IFinance interface {
 	GetCandle(from, to string) *Candle
 
 	GetError() error
+
+	Ticker() *string
+	XRange() *[]time.Time
+	YRange() *[]float64
 }
 
 type Finance struct {
-	Ticker  string
-	Profile Profile
-	Quote   Quote
-	Candle  Candle
+	Ticker string
+	*Profile
+	*Quote
+	*Candle
 }
 
 type Profile struct {
@@ -52,12 +56,12 @@ type Candle struct {
 
 func Plot(stock IFinance) {
 	quotes := chart.TimeSeries{
-		Name: stock.GetName(),
+		Name: *stock.Ticker(),
 		Style: chart.Style{
 			StrokeColor: chart.GetDefaultColor(0),
 		},
-		XValues: nil,
-		YValues: nil,
+		XValues: *stock.XRange(),
+		YValues: *stock.YRange(),
 	}
 
 	graph := chart.Chart{

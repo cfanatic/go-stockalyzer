@@ -33,7 +33,7 @@ func (fh *Finnhub) GetProfile() *Profile {
 		p.GICSSector = profile.GICSSector
 		p.ISIN = profile.ISIN
 		p.Name = profile.Name
-		fh.Finance.Profile = p
+		fh.Finance.Profile = &p
 	} else {
 		fh.err = err
 	}
@@ -48,6 +48,7 @@ func (fh *Finnhub) GetQuote() *Quote {
 		q.Low = quote.Low
 		q.Current = quote.Current
 		q.PrevClose = quote.PreviousClose
+		fh.Finance.Quote = &q
 	} else {
 		fh.err = err
 	}
@@ -71,6 +72,7 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 		c.Open = candle.Open
 		c.Times = candle.Times
 		c.Volume = candle.Volume
+		fh.Finance.Candle = &c
 	} else {
 		fh.err = err
 	}
@@ -79,4 +81,16 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 
 func (fh *Finnhub) GetError() error {
 	return fh.err
+}
+
+func (fh *Finnhub) Ticker() *string {
+	return &fh.Finance.Ticker
+}
+
+func (fh *Finnhub) XRange() *[]time.Time {
+	return &fh.Finance.Candle.Times
+}
+
+func (fh *Finnhub) YRange() *[]float64 {
+	return &fh.Finance.Candle.Open
 }
