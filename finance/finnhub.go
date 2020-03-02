@@ -65,6 +65,9 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 		From:  &t1,
 		To:    &t2,
 	}
+	if t1.Weekday() == time.Saturday || t2.Weekday() == time.Sunday {
+		panic("Stock market is closed on weekends")
+	}
 	if candle, err := fh.client.Stock.GetCandle(fh.Finance.Ticker, finnhub.CandleResolutionSecond, param); err == nil {
 		c.Close = candle.Close
 		c.High = candle.High
