@@ -9,7 +9,8 @@ import (
 type keys int
 
 const (
-	PATH               = "misc/config.toml"
+	PATH_R             = "misc/config.toml"
+	PATH_D             = "../../misc/config.toml"
 	FINNHUB_TOKEN keys = iota
 )
 
@@ -23,7 +24,7 @@ type finnhub struct {
 
 func Get(key keys) interface{} {
 	var conf config
-	path, _ := filepath.Abs(PATH)
+	path, _ := filepath.Abs(PATH_R)
 	if _, err := toml.DecodeFile(path, &conf); err != nil {
 		panic(err)
 	}
