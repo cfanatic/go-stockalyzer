@@ -1,6 +1,7 @@
 package finance
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cfanatic/stockalyzer/configuration"
@@ -68,7 +69,7 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 	if t1.Weekday() == time.Saturday || t2.Weekday() == time.Sunday {
 		panic("Stock market is closed on weekends")
 	}
-	if candle, err := fh.client.Stock.GetCandle(fh.Finance.Ticker, finnhub.CandleResolutionSecond, param); err == nil {
+	if candle, err := fh.client.Stock.GetCandle(fh.Finance.Ticker, finnhub.CandleResolution15Second, param); err == nil {
 		c.Close = candle.Close
 		c.High = candle.High
 		c.Low = candle.Low
@@ -80,6 +81,40 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 		fh.err = err
 	}
 	return &c
+}
+
+func (fh *Finnhub) GetChart(period Duration) *Candle {
+	var from, to string
+	weekendShift := func(start time.Time, days int) int {
+		delta := 0
+		for i := 0; i < days; i++ {
+			if (start.AddDate(0, 0, -i)).Weekday() == time.Saturday ||
+				start.AddDate(0, 0, -i).Weekday() == time.Sunday {
+				delta++
+			}
+		}
+		return -days - delta + 1
+	}
+	switch period {
+	case D1:
+		now := time.Now()
+		from = fmt.Sprintf("%s 08:00:00", now.Format("2006-01-02"))
+		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
+	case D5:
+		now := time.Now()
+		then := now.AddDate(0, 0, weekendShift(now, 5))
+		from = fmt.Sprintf("%s 08:00:00", then.Format("2006-01-02"))
+		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
+	case D10:
+	case M3:
+	case M6:
+	case Y1:
+	case Y5:
+	case Max:
+	default:
+		panic("Unkown chart duration parameter")
+	}
+	return fh.GetCandle(from, to)
 }
 
 func (fh *Finnhub) Ticker() *string {

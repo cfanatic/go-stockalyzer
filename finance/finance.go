@@ -8,10 +8,24 @@ import (
 	"github.com/wcharczuk/go-chart"
 )
 
+type Duration int
+
+const (
+	D1 Duration = iota
+	D5
+	D10
+	M3
+	M6
+	Y1
+	Y5
+	Max
+)
+
 type IFinance interface {
 	GetProfile() *Profile
 	GetQuote() *Quote
 	GetCandle(from, to string) *Candle
+	GetChart(period Duration) *Candle
 
 	Ticker() *string
 	XValues() *[]time.Time
@@ -65,12 +79,9 @@ func Plot(stock IFinance) {
 
 	graph := chart.Chart{
 		XAxis: chart.XAxis{
-			ValueFormatter: chart.TimeHourValueFormatter,
+			ValueFormatter: chart.TimeDateValueFormatter,
 			TickPosition:   chart.TickPositionBetweenTicks,
 		},
-		// YAxis: chart.YAxis{
-		// 	Range: &chart.ContinuousRange{},
-		// },
 		Series: []chart.Series{
 			quotes,
 		},
