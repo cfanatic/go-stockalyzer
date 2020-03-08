@@ -28,12 +28,15 @@ type IFinance interface {
 	GetChart(period Duration) *Candle
 
 	Ticker() *string
+	Times() *[]time.Time
 	XValues() *[]time.Time
 	YValues() *[]float64
 }
 
 type Finance struct {
-	Ticker string
+	Ticker   string
+	Times    []time.Time
+	Duration Duration
 	*Profile
 	*Quote
 	*Candle
@@ -68,18 +71,32 @@ type Candle struct {
 }
 
 func Plot(stock IFinance) {
-	quotes := chart.TimeSeries{
+	times := stock.Times()
+	ticks := []chart.Tick{
+		chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", (*times)[0].Format("2006-01-02"))},
+		chart.Tick{Value: float64(35), Label: fmt.Sprintf("%s", (*times)[1].Format("2006-01-02"))},
+		chart.Tick{Value: float64(70), Label: fmt.Sprintf("%s", (*times)[2].Format("2006-01-02"))},
+		chart.Tick{Value: float64(105), Label: fmt.Sprintf("%s", (*times)[3].Format("2006-01-02"))},
+		chart.Tick{Value: float64(140), Label: fmt.Sprintf("%s", (*times)[4].Format("2006-01-02"))},
+		chart.Tick{Value: float64(174), Label: ""},
+	}
+	xval := make([]float64, len(*stock.XValues()))
+	for i := 0; i < len(*stock.XValues()); i++ {
+		xval[i] = float64(i)
+	}
+	quotes := chart.ContinuousSeries{
 		Name: *stock.Ticker(),
 		Style: chart.Style{
 			StrokeColor: chart.GetDefaultColor(0),
 		},
-		XValues: *stock.XValues(),
+		XValues: xval,
 		YValues: *stock.YValues(),
 	}
 	graph := chart.Chart{
 		XAxis: chart.XAxis{
+			Ticks:          ticks,
+			TickPosition:   chart.TickPositionUnderTick,
 			ValueFormatter: chart.TimeDateValueFormatter,
-			TickPosition:   chart.TickPositionBetweenTicks,
 		},
 		Series: []chart.Series{
 			quotes,

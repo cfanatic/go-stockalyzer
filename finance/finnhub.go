@@ -96,6 +96,10 @@ func (fh *Finnhub) GetChart(period Duration) *Candle {
 		then := now.AddDate(0, 0, fh.dateShift(now, 5))
 		from = fmt.Sprintf("%s 08:00:00", then.Format("2006-01-02"))
 		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
+		for i := 5; i > 0; i-- {
+			fh.Finance.Times = append(fh.Finance.Times, now.AddDate(0, 0, -i-1))
+		}
+		fmt.Println(fh.Finance.Times)
 	case D10:
 	case M3:
 	case M6:
@@ -113,6 +117,13 @@ func (fh *Finnhub) Ticker() *string {
 		panic(fh.err)
 	}
 	return &fh.Finance.Ticker
+}
+
+func (fh *Finnhub) Times() *[]time.Time {
+	if fh.err != nil {
+		panic(fh.err)
+	}
+	return &fh.Finance.Times
 }
 
 func (fh *Finnhub) XValues() *[]time.Time {
