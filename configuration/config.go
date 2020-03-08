@@ -1,6 +1,7 @@
 package configuration
 
 import (
+	"flag"
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
@@ -14,6 +15,10 @@ const (
 	FINNHUB_TOKEN keys = iota
 )
 
+var (
+	mode = flag.String("mode", "release", "define release or debug mode")
+)
+
 type config struct {
 	Finnhub finnhub
 }
@@ -23,8 +28,15 @@ type finnhub struct {
 }
 
 func Get(key keys) interface{} {
-	var conf config
-	path, _ := filepath.Abs(PATH_R)
+	var (
+		conf config
+		path string
+	)
+	if flag.Parse(); *mode == "release" {
+		path, _ = filepath.Abs(PATH_R)
+	} else if *mode == "debug" {
+		path, _ = filepath.Abs(PATH_D)
+	}
 	if _, err := toml.DecodeFile(path, &conf); err != nil {
 		panic(err)
 	}
