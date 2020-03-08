@@ -66,8 +66,10 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 		From:  &t1,
 		To:    &t2,
 	}
-	if t1.Weekday() == time.Saturday || t2.Weekday() == time.Sunday {
-		panic("Stock market is closed on weekends")
+	if fh.dateEqual(t1, t2) {
+		if t1.Weekday() == time.Saturday || t2.Weekday() == time.Sunday {
+			panic("Stock market is closed on weekends")
+		}
 	}
 	if candle, err := fh.client.Stock.GetCandle(fh.Finance.Ticker, finnhub.CandleResolution15Second, param); err == nil {
 		c.Close = candle.Close
@@ -85,16 +87,6 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 
 func (fh *Finnhub) GetChart(period Duration) *Candle {
 	var from, to string
-	weekendShift := func(start time.Time, days int) int {
-		delta := 0
-		for i := 0; i < days; i++ {
-			if (start.AddDate(0, 0, -i)).Weekday() == time.Saturday ||
-				start.AddDate(0, 0, -i).Weekday() == time.Sunday {
-				delta++
-			}
-		}
-		return -days - delta + 1
-	}
 	switch period {
 	case D1:
 		now := time.Now()
@@ -102,7 +94,7 @@ func (fh *Finnhub) GetChart(period Duration) *Candle {
 		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
 	case D5:
 		now := time.Now()
-		then := now.AddDate(0, 0, weekendShift(now, 5))
+		then := now.AddDate(0, 0, fh.dateShift(now, 5))
 		from = fmt.Sprintf("%s 08:00:00", then.Format("2006-01-02"))
 		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
 	case D10:
@@ -136,4 +128,21 @@ func (fh *Finnhub) YValues() *[]float64 {
 		panic(fh.err)
 	}
 	return &fh.Finance.Candle.Open
+}
+
+func (fh *Finnhub) dateEqual(date1, date2 time.Time) bool {
+	y1, m1, d1 := date1.Date()
+	y2, m2, d2 := date2.Date()
+	return y1 == y2 && m1 == m2 && d1 == d2
+}
+
+func (fh *Finnhub) dateShift(start time.Time, days int) int {
+	delta := 0
+	for i := 0; i < days; i++ {
+		if (start.AddDate(0, 0, -i)).Weekday() == time.Saturday ||
+			start.AddDate(0, 0, -i).Weekday() == time.Sunday {
+			delta++
+		}
+	}
+	return -days - delta + 1
 }
