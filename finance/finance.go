@@ -76,7 +76,6 @@ func Plot(stock IFinance) {
 		XValues: *stock.XValues(),
 		YValues: *stock.YValues(),
 	}
-
 	graph := chart.Chart{
 		XAxis: chart.XAxis{
 			ValueFormatter: chart.TimeDateValueFormatter,
@@ -86,11 +85,9 @@ func Plot(stock IFinance) {
 			quotes,
 		},
 	}
-
 	graph.Elements = []chart.Renderable{
 		chart.Legend(&graph),
 	}
-
 	f, _ := os.Create("bin/output.png")
 	defer f.Close()
 	graph.Render(chart.PNG, f)
