@@ -1,6 +1,7 @@
 package finance
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cfanatic/stockalyzer/configuration"
@@ -16,8 +17,7 @@ type Finnhub struct {
 }
 
 func NewFinnhub(symbol string) *Finnhub {
-	key := configuration.FINNHUB_TOKEN
-	token := configuration.Get(key).(string)
+	token := configuration.Get(configuration.FINNHUB_TOKEN).(string)
 	c := client.New(token)
 	return &Finnhub{client: *c, Finance: Finance{Ticker: symbol}, err: nil}
 }
@@ -65,7 +65,12 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 		From:  &t1,
 		To:    &t2,
 	}
-	if candle, err := fh.client.Stock.GetCandle(fh.Finance.Ticker, finnhub.CandleResolutionSecond, param); err == nil {
+	if fh.dateEqual(t1, t2) {
+		if t1.Weekday() == time.Saturday || t2.Weekday() == time.Sunday {
+			panic("Stock market is closed on weekends")
+		}
+	}
+	if candle, err := fh.client.Stock.GetCandle(fh.Finance.Ticker, finnhub.CandleResolution15Second, param); err == nil {
 		c.Close = candle.Close
 		c.High = candle.High
 		c.Low = candle.Low
@@ -79,11 +84,43 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 	return &c
 }
 
+func (fh *Finnhub) GetChart(duration Duration) *Candle {
+	var from, to string
+	switch duration {
+	case D1:
+		now := time.Now()
+		from = fmt.Sprintf("%s 08:00:00", now.Format("2006-01-02"))
+		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
+	case D5:
+		now := time.Now()
+		then := now.AddDate(0, 0, fh.dateShift(now, 5))
+		from = fmt.Sprintf("%s 08:00:00", then.Format("2006-01-02"))
+		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
+		fh.Finance.Duration = duration
+	case D10:
+	case M3:
+	case M6:
+	case Y1:
+	case Y5:
+	case Max:
+	default:
+		panic("Unkown chart duration parameter")
+	}
+	return fh.GetCandle(from, to)
+}
+
 func (fh *Finnhub) Ticker() *string {
 	if fh.err != nil {
 		panic(fh.err)
 	}
 	return &fh.Finance.Ticker
+}
+
+func (fh *Finnhub) Duration() *Duration {
+	if fh.err != nil {
+		panic(fh.err)
+	}
+	return &fh.Finance.Duration
 }
 
 func (fh *Finnhub) XValues() *[]time.Time {
@@ -98,4 +135,21 @@ func (fh *Finnhub) YValues() *[]float64 {
 		panic(fh.err)
 	}
 	return &fh.Finance.Candle.Open
+}
+
+func (fh *Finnhub) dateEqual(date1, date2 time.Time) bool {
+	y1, m1, d1 := date1.Date()
+	y2, m2, d2 := date2.Date()
+	return y1 == y2 && m1 == m2 && d1 == d2
+}
+
+func (fh *Finnhub) dateShift(start time.Time, days int) int {
+	delta := 0
+	for i := 0; i < days; i++ {
+		if (start.AddDate(0, 0, -i)).Weekday() == time.Saturday ||
+			start.AddDate(0, 0, -i).Weekday() == time.Sunday {
+			delta++
+		}
+	}
+	return -days - delta + 1
 }
