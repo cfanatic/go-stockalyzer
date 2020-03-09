@@ -25,17 +25,16 @@ type IFinance interface {
 	GetProfile() *Profile
 	GetQuote() *Quote
 	GetCandle(from, to string) *Candle
-	GetChart(period Duration) *Candle
+	GetChart(duration Duration) *Candle
 
 	Ticker() *string
-	Times() *[]time.Time
+	Duration() *Duration
 	XValues() *[]time.Time
 	YValues() *[]float64
 }
 
 type Finance struct {
 	Ticker   string
-	Times    []time.Time
 	Duration Duration
 	*Profile
 	*Quote
@@ -71,36 +70,65 @@ type Candle struct {
 }
 
 func Plot(stock IFinance) {
-	times := stock.Times()
-	ticks := []chart.Tick{
-		chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", (*times)[0].Format("2006-01-02"))},
-		chart.Tick{Value: float64(35), Label: fmt.Sprintf("%s", (*times)[1].Format("2006-01-02"))},
-		chart.Tick{Value: float64(70), Label: fmt.Sprintf("%s", (*times)[2].Format("2006-01-02"))},
-		chart.Tick{Value: float64(105), Label: fmt.Sprintf("%s", (*times)[3].Format("2006-01-02"))},
-		chart.Tick{Value: float64(140), Label: fmt.Sprintf("%s", (*times)[4].Format("2006-01-02"))},
-		chart.Tick{Value: float64(174), Label: ""},
-	}
-	xval := make([]float64, len(*stock.XValues()))
-	for i := 0; i < len(*stock.XValues()); i++ {
-		xval[i] = float64(i)
-	}
-	quotes := chart.ContinuousSeries{
-		Name: *stock.Ticker(),
-		Style: chart.Style{
-			StrokeColor: chart.GetDefaultColor(0),
-		},
-		XValues: xval,
-		YValues: *stock.YValues(),
-	}
-	graph := chart.Chart{
-		XAxis: chart.XAxis{
+	graph := chart.Chart{}
+	switch *stock.Duration() {
+	case D1:
+		graph = chart.Chart{
+			XAxis: chart.XAxis{
+				ValueFormatter: chart.TimeHourValueFormatter,
+				TickPosition:   chart.TickPositionUnderTick,
+			},
+			// YAxis: chart.YAxis{
+			// 	Range: &chart.ContinuousRange{},
+			// },
+			Series: []chart.Series{
+				chart.TimeSeries{
+					Name: *stock.Ticker(),
+					Style: chart.Style{
+						StrokeColor: chart.GetDefaultColor(0),
+					},
+					XValues: *stock.XValues(),
+					YValues: *stock.YValues(),
+				},
+			},
+		}
+	case D5:
+		time := *stock.XValues()
+		ticks := append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", time[0].Format("2006-01-02"))})
+		for i := 1; i < len(time)-1; i++ {
+			_, _, day1 := time[i].Date()
+			_, _, day2 := time[i+1].Date()
+			if day1 != day2 {
+				ticks = append(ticks, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("2006-01-02"))})
+			}
+		}
+		ticks = append(ticks, chart.Tick{Value: float64(len(time)), Label: ""})
+		xaxis := chart.XAxis{
 			Ticks:          ticks,
 			TickPosition:   chart.TickPositionUnderTick,
 			ValueFormatter: chart.TimeDateValueFormatter,
-		},
-		Series: []chart.Series{
-			quotes,
-		},
+		}
+		graph = chart.Chart{
+			XAxis: xaxis,
+			Series: []chart.Series{
+				chart.ContinuousSeries{
+					Name: *stock.Ticker(),
+					Style: chart.Style{
+						StrokeColor: chart.GetDefaultColor(0),
+					},
+					XValues: func() []float64 {
+						xvalues := make([]float64, len(time))
+						for i := 0; i < len(*stock.XValues()); i++ {
+							xvalues[i] = float64(i)
+						}
+						return xvalues
+					}(),
+					YValues: *stock.YValues(),
+				},
+			},
+		}
+	default:
+		panic("Unkown chart duration parameter during plot")
 	}
 	graph.Elements = []chart.Renderable{
 		chart.Legend(&graph),

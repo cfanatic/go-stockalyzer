@@ -84,9 +84,9 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 	return &c
 }
 
-func (fh *Finnhub) GetChart(period Duration) *Candle {
+func (fh *Finnhub) GetChart(duration Duration) *Candle {
 	var from, to string
-	switch period {
+	switch duration {
 	case D1:
 		now := time.Now()
 		from = fmt.Sprintf("%s 08:00:00", now.Format("2006-01-02"))
@@ -96,10 +96,7 @@ func (fh *Finnhub) GetChart(period Duration) *Candle {
 		then := now.AddDate(0, 0, fh.dateShift(now, 5))
 		from = fmt.Sprintf("%s 08:00:00", then.Format("2006-01-02"))
 		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
-		for i := 5; i > 0; i-- {
-			fh.Finance.Times = append(fh.Finance.Times, now.AddDate(0, 0, -i-1))
-		}
-		fmt.Println(fh.Finance.Times)
+		fh.Finance.Duration = duration
 	case D10:
 	case M3:
 	case M6:
@@ -119,11 +116,11 @@ func (fh *Finnhub) Ticker() *string {
 	return &fh.Finance.Ticker
 }
 
-func (fh *Finnhub) Times() *[]time.Time {
+func (fh *Finnhub) Duration() *Duration {
 	if fh.err != nil {
 		panic(fh.err)
 	}
-	return &fh.Finance.Times
+	return &fh.Finance.Duration
 }
 
 func (fh *Finnhub) XValues() *[]time.Time {
