@@ -32,10 +32,10 @@ func Get(key keys) interface{} {
 		conf config
 		path string
 	)
-	if flag.Parse(); *mode == "release" {
-		path, _ = filepath.Abs(PATH_R)
-	} else if *mode == "debug" {
+	if flag.Parse(); *mode == "debug" {
 		path, _ = filepath.Abs(PATH_D)
+	} else {
+		path, _ = filepath.Abs(PATH_R)
 	}
 	if _, err := toml.DecodeFile(path, &conf); err != nil {
 		panic(err)
