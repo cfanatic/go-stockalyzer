@@ -92,7 +92,7 @@ func Plot(stock IFinance) {
 				},
 			},
 		}
-	case D5:
+	case D5, D10:
 		time := *stock.XValues()
 		ticks := append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", time[0].Format("2006-01-02"))})
 		for i := 1; i < len(time)-1; i++ {
@@ -118,7 +118,7 @@ func Plot(stock IFinance) {
 					},
 					XValues: func() []float64 {
 						xvalues := make([]float64, len(time))
-						for i := 0; i < len(*stock.XValues()); i++ {
+						for i := 0; i < len(time); i++ {
 							xvalues[i] = float64(i)
 						}
 						return xvalues
