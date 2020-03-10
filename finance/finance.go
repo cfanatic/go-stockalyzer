@@ -73,14 +73,28 @@ func Plot(stock IFinance) {
 	graph := chart.Chart{}
 	switch *stock.Duration() {
 	case D1:
+		time := *stock.XValues()
+		grids := []chart.GridLine{}
+		for i := 1; i < len(time)-1; i++ {
+			hour1, _, _ := time[i].Clock()
+			hour2, _, _ := time[i+1].Clock()
+			if hour1 != hour2 {
+				grids = append(grids, chart.GridLine{Value: chart.TimeToFloat64(time[i+1])})
+			}
+		}
 		graph = chart.Chart{
 			XAxis: chart.XAxis{
 				ValueFormatter: chart.TimeHourValueFormatter,
 				TickPosition:   chart.TickPositionUnderTick,
+				GridMajorStyle: chart.Style{
+					StrokeColor: chart.ColorAlternateLightGray,
+					StrokeWidth: 1.0,
+				},
+				GridLines: grids,
 			},
-			// YAxis: chart.YAxis{
-			// 	Range: &chart.ContinuousRange{},
-			// },
+			YAxis: chart.YAxis{
+				Range: &chart.ContinuousRange{},
+			},
 			Series: []chart.Series{
 				chart.TimeSeries{
 					Name: *stock.Ticker(),
@@ -95,11 +109,13 @@ func Plot(stock IFinance) {
 	case D5, D10:
 		time := *stock.XValues()
 		ticks := append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", time[0].Format("2006-01-02"))})
+		grids := []chart.GridLine{}
 		for i := 1; i < len(time)-1; i++ {
 			_, _, day1 := time[i].Date()
 			_, _, day2 := time[i+1].Date()
 			if day1 != day2 {
 				ticks = append(ticks, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("2006-01-02"))})
+				grids = append(grids, chart.GridLine{Value: float64(i + 1)})
 			}
 		}
 		ticks = append(ticks, chart.Tick{Value: float64(len(time)), Label: ""})
@@ -107,6 +123,11 @@ func Plot(stock IFinance) {
 			Ticks:          ticks,
 			TickPosition:   chart.TickPositionUnderTick,
 			ValueFormatter: chart.TimeDateValueFormatter,
+			GridMajorStyle: chart.Style{
+				StrokeColor: chart.ColorAlternateLightGray,
+				StrokeWidth: 1.0,
+			},
+			GridLines: grids,
 		}
 		graph = chart.Chart{
 			XAxis: xaxis,

@@ -84,7 +84,7 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 	case Y5:
 	case Max:
 	default:
-		panic("Unknown resolution parameter")
+		panic("Unknown candle resolution parameter")
 	}
 	if candle, err := fh.client.Stock.GetCandle(fh.Finance.Ticker, resolution, param); err == nil {
 		c.Close = candle.Close
