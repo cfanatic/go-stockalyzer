@@ -56,6 +56,7 @@ func (fh *Finnhub) GetQuote() *Quote {
 }
 
 func (fh *Finnhub) GetCandle(from, to string) *Candle {
+	var resolution finnhub.CandleResolution
 	c := Candle{}
 	layout := "2006-01-02 15:04:05"
 	t1, _ := time.Parse(layout, from)
@@ -70,7 +71,22 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 			panic("Stock market is closed on weekends")
 		}
 	}
-	if candle, err := fh.client.Stock.GetCandle(fh.Finance.Ticker, finnhub.CandleResolution15Second, param); err == nil {
+	switch *fh.Duration() {
+	case D1:
+		resolution = finnhub.CandleResolutionSecond
+	case D5:
+		resolution = finnhub.CandleResolution5Second
+	case D10:
+		resolution = finnhub.CandleResolution15Second
+	case M3:
+	case M6:
+	case Y1:
+	case Y5:
+	case Max:
+	default:
+		panic("Unknown chart duration parameter")
+	}
+	if candle, err := fh.client.Stock.GetCandle(fh.Finance.Ticker, resolution, param); err == nil {
 		c.Close = candle.Close
 		c.High = candle.High
 		c.Low = candle.Low
@@ -86,26 +102,26 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 
 func (fh *Finnhub) GetChart(duration Duration) *Candle {
 	var from, to string
+	var now, then time.Time
+	fh.Finance.Duration = duration
+	now = time.Now()
 	switch duration {
 	case D1:
-		now := time.Now()
-		from = fmt.Sprintf("%s 08:00:00", now.Format("2006-01-02"))
-		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
+		then = now.AddDate(0, 0, fh.dateShift(now, 0))
 	case D5:
-		now := time.Now()
-		then := now.AddDate(0, 0, fh.dateShift(now, 5))
-		from = fmt.Sprintf("%s 08:00:00", then.Format("2006-01-02"))
-		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
-		fh.Finance.Duration = duration
+		then = now.AddDate(0, 0, fh.dateShift(now, 5))
 	case D10:
+		then = now.AddDate(0, 0, fh.dateShift(now, 10))
 	case M3:
 	case M6:
 	case Y1:
 	case Y5:
 	case Max:
 	default:
-		panic("Unkown chart duration parameter")
+		panic("Unknown chart duration parameter")
 	}
+	from = fmt.Sprintf("%s 08:00:00", then.Format("2006-01-02"))
+	to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
 	return fh.GetCandle(from, to)
 }
 
@@ -144,12 +160,27 @@ func (fh *Finnhub) dateEqual(date1, date2 time.Time) bool {
 }
 
 func (fh *Finnhub) dateShift(start time.Time, days int) int {
-	delta := 0
+	delta, shift := 0, 0
 	for i := 0; i < days; i++ {
 		if (start.AddDate(0, 0, -i)).Weekday() == time.Saturday ||
 			start.AddDate(0, 0, -i).Weekday() == time.Sunday {
 			delta++
 		}
 	}
-	return -days - delta + 1
+	switch *fh.Duration() {
+	case D1:
+		shift = -days - delta
+	case D5:
+		shift = -days - delta + 1
+	case D10:
+		shift = -days - delta - 1
+	case M3:
+	case M6:
+	case Y1:
+	case Y5:
+	case Max:
+	default:
+		panic("Unknown chart duration parameter")
+	}
+	return shift
 }

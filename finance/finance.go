@@ -70,65 +70,79 @@ type Candle struct {
 }
 
 func Plot(stock IFinance) {
-	graph := chart.Chart{}
+	var time []time.Time
+	var tick []chart.Tick
+	var grid []chart.GridLine
 	switch *stock.Duration() {
 	case D1:
-		graph = chart.Chart{
-			XAxis: chart.XAxis{
-				ValueFormatter: chart.TimeHourValueFormatter,
-				TickPosition:   chart.TickPositionUnderTick,
-			},
-			// YAxis: chart.YAxis{
-			// 	Range: &chart.ContinuousRange{},
-			// },
-			Series: []chart.Series{
-				chart.TimeSeries{
-					Name: *stock.Ticker(),
-					Style: chart.Style{
-						StrokeColor: chart.GetDefaultColor(0),
-					},
-					XValues: *stock.XValues(),
-					YValues: *stock.YValues(),
-				},
-			},
+		time = *stock.XValues()
+		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", time[0].Format("01-02 3PM"))})
+		grid = []chart.GridLine{}
+		for i := 1; i < len(time)-1; i++ {
+			hour1, _, _ := time[i].Clock()
+			hour2, _, _ := time[i+1].Clock()
+			if hour1 != hour2 {
+				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("01-02 3PM"))})
+				grid = append(grid, chart.GridLine{Value: float64(i + 1)})
+			}
 		}
-	case D5:
-		time := *stock.XValues()
-		ticks := append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", time[0].Format("2006-01-02"))})
+		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
+	case D5, D10:
+		time = *stock.XValues()
+		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", time[0].Format("2006-01-02"))})
+		grid = []chart.GridLine{}
 		for i := 1; i < len(time)-1; i++ {
 			_, _, day1 := time[i].Date()
 			_, _, day2 := time[i+1].Date()
 			if day1 != day2 {
-				ticks = append(ticks, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("2006-01-02"))})
+				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("2006-01-02"))})
+				grid = append(grid, chart.GridLine{Value: float64(i + 1)})
 			}
 		}
-		ticks = append(ticks, chart.Tick{Value: float64(len(time)), Label: ""})
-		xaxis := chart.XAxis{
-			Ticks:          ticks,
-			TickPosition:   chart.TickPositionUnderTick,
-			ValueFormatter: chart.TimeDateValueFormatter,
-		}
-		graph = chart.Chart{
-			XAxis: xaxis,
-			Series: []chart.Series{
-				chart.ContinuousSeries{
-					Name: *stock.Ticker(),
-					Style: chart.Style{
-						StrokeColor: chart.GetDefaultColor(0),
-					},
-					XValues: func() []float64 {
-						xvalues := make([]float64, len(time))
-						for i := 0; i < len(*stock.XValues()); i++ {
-							xvalues[i] = float64(i)
-						}
-						return xvalues
-					}(),
-					YValues: *stock.YValues(),
-				},
-			},
-		}
+		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
 	default:
 		panic("Unkown chart duration parameter during plot")
+	}
+	graph := chart.Chart{
+		XAxis: chart.XAxis{
+			GridMajorStyle: chart.Style{
+				StrokeColor: chart.ColorAlternateLightGray,
+				StrokeWidth: 1.0,
+			},
+			GridLines:      grid,
+			Ticks:          tick,
+			TickPosition:   chart.TickPositionUnderTick,
+			ValueFormatter: chart.TimeDateValueFormatter,
+		},
+		YAxis: chart.YAxis{
+			GridMinorStyle: chart.Style{
+				StrokeColor: chart.ColorAlternateLightGray,
+				StrokeWidth: 1.0,
+			},
+			Range: &chart.ContinuousRange{},
+			ValueFormatter: func(v interface{}) string {
+				if v, isFloat := v.(float64); isFloat {
+					return fmt.Sprintf("%0.f", v)
+				}
+				return ""
+			},
+		},
+		Series: []chart.Series{
+			chart.ContinuousSeries{
+				Name: *stock.Ticker(),
+				Style: chart.Style{
+					StrokeColor: chart.GetDefaultColor(0),
+				},
+				XValues: func() []float64 {
+					xvalues := make([]float64, len(time))
+					for i := 0; i < len(time); i++ {
+						xvalues[i] = float64(i)
+					}
+					return xvalues
+				}(),
+				YValues: *stock.YValues(),
+			},
+		},
 	}
 	graph.Elements = []chart.Renderable{
 		chart.Legend(&graph),
