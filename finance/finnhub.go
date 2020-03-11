@@ -56,6 +56,7 @@ func (fh *Finnhub) GetQuote() *Quote {
 }
 
 func (fh *Finnhub) GetCandle(from, to string) *Candle {
+	var resolution finnhub.CandleResolution
 	c := Candle{}
 	layout := "2006-01-02 15:04:05"
 	t1, _ := time.Parse(layout, from)
@@ -70,7 +71,6 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 			panic("Stock market is closed on weekends")
 		}
 	}
-	var resolution finnhub.CandleResolution
 	switch *fh.Duration() {
 	case D1:
 		resolution = finnhub.CandleResolutionSecond
@@ -101,10 +101,8 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 }
 
 func (fh *Finnhub) GetChart(duration Duration) *Candle {
-	var (
-		from, to  string
-		now, then time.Time
-	)
+	var from, to string
+	var now, then time.Time
 	fh.Finance.Duration = duration
 	now = time.Now()
 	switch duration {
