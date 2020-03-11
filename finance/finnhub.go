@@ -71,7 +71,7 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 		}
 	}
 	var resolution finnhub.CandleResolution
-	switch fh.Finance.Duration {
+	switch *fh.Duration() {
 	case D1:
 		resolution = finnhub.CandleResolutionSecond
 	case D5:
@@ -84,7 +84,7 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 	case Y5:
 	case Max:
 	default:
-		panic("Unknown candle resolution parameter")
+		panic("Unknown chart duration parameter")
 	}
 	if candle, err := fh.client.Stock.GetCandle(fh.Finance.Ticker, resolution, param); err == nil {
 		c.Close = candle.Close
@@ -101,20 +101,19 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 }
 
 func (fh *Finnhub) GetChart(duration Duration) *Candle {
-	var from, to string
-	now := time.Now()
+	var (
+		from, to  string
+		now, then time.Time
+	)
+	fh.Finance.Duration = duration
+	now = time.Now()
 	switch duration {
 	case D1:
-		from = fmt.Sprintf("%s 08:00:00", now.Format("2006-01-02"))
-		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
+		then = now.AddDate(0, 0, fh.dateShift(now, 0))
 	case D5:
-		then := now.AddDate(0, 0, fh.dateShift(now, 5))
-		from = fmt.Sprintf("%s 08:00:00", then.Format("2006-01-02"))
-		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
+		then = now.AddDate(0, 0, fh.dateShift(now, 5))
 	case D10:
-		then := now.AddDate(0, 0, fh.dateShift(now, 10))
-		from = fmt.Sprintf("%s 08:00:00", then.Format("2006-01-02"))
-		to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
+		then = now.AddDate(0, 0, fh.dateShift(now, 10))
 	case M3:
 	case M6:
 	case Y1:
@@ -123,7 +122,8 @@ func (fh *Finnhub) GetChart(duration Duration) *Candle {
 	default:
 		panic("Unknown chart duration parameter")
 	}
-	fh.Finance.Duration = duration
+	from = fmt.Sprintf("%s 08:00:00", then.Format("2006-01-02"))
+	to = fmt.Sprintf("%s 22:00:00", now.Format("2006-01-02"))
 	return fh.GetCandle(from, to)
 }
 
@@ -162,17 +162,27 @@ func (fh *Finnhub) dateEqual(date1, date2 time.Time) bool {
 }
 
 func (fh *Finnhub) dateShift(start time.Time, days int) int {
-	delta := 0
+	delta, shift := 0, 0
 	for i := 0; i < days; i++ {
 		if (start.AddDate(0, 0, -i)).Weekday() == time.Saturday ||
 			start.AddDate(0, 0, -i).Weekday() == time.Sunday {
 			delta++
 		}
 	}
-	// Adjust shift based on whether D5 or D10 is requested
-	if days%2 == 0 {
-		return -days - delta
-	} else {
-		return -days - delta + 1
+	switch *fh.Duration() {
+	case D1:
+		shift = -days - delta
+	case D5:
+		shift = -days - delta + 1
+	case D10:
+		shift = -days - delta - 1
+	case M3:
+	case M6:
+	case Y1:
+	case Y5:
+	case Max:
+	default:
+		panic("Unknown chart duration parameter")
 	}
+	return shift
 }

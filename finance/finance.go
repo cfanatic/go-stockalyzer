@@ -119,18 +119,17 @@ func Plot(stock IFinance) {
 			}
 		}
 		ticks = append(ticks, chart.Tick{Value: float64(len(time)), Label: ""})
-		xaxis := chart.XAxis{
-			Ticks:          ticks,
-			TickPosition:   chart.TickPositionUnderTick,
-			ValueFormatter: chart.TimeDateValueFormatter,
-			GridMajorStyle: chart.Style{
-				StrokeColor: chart.ColorAlternateLightGray,
-				StrokeWidth: 1.0,
-			},
-			GridLines: grids,
-		}
 		graph = chart.Chart{
-			XAxis: xaxis,
+			XAxis: chart.XAxis{
+				ValueFormatter: chart.TimeDateValueFormatter,
+				Ticks:          ticks,
+				TickPosition:   chart.TickPositionUnderTick,
+				GridMajorStyle: chart.Style{
+					StrokeColor: chart.ColorAlternateLightGray,
+					StrokeWidth: 1.0,
+				},
+				GridLines: grids,
+			},
 			Series: []chart.Series{
 				chart.ContinuousSeries{
 					Name: *stock.Ticker(),
