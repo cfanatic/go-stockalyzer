@@ -105,17 +105,23 @@ func Plot(stock IFinance) {
 	}
 	graph := chart.Chart{
 		XAxis: chart.XAxis{
-			ValueFormatter: chart.TimeDateValueFormatter,
-			Ticks:          tick,
-			TickPosition:   chart.TickPositionUnderTick,
 			GridMajorStyle: chart.Style{
 				StrokeColor: chart.ColorAlternateLightGray,
 				StrokeWidth: 1.0,
 			},
-			GridLines: grid,
+			GridLines:      grid,
+			Ticks:          tick,
+			TickPosition:   chart.TickPositionUnderTick,
+			ValueFormatter: chart.TimeDateValueFormatter,
 		},
 		YAxis: chart.YAxis{
 			Range: &chart.ContinuousRange{},
+			ValueFormatter: func(v interface{}) string {
+				if v, isFloat := v.(float64); isFloat {
+					return fmt.Sprintf("%0.f", v)
+				}
+				return ""
+			},
 		},
 		Series: []chart.Series{
 			chart.ContinuousSeries{
