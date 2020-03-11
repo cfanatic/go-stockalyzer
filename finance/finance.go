@@ -115,6 +115,10 @@ func Plot(stock IFinance) {
 			ValueFormatter: chart.TimeDateValueFormatter,
 		},
 		YAxis: chart.YAxis{
+			GridMinorStyle: chart.Style{
+				StrokeColor: chart.ColorAlternateLightGray,
+				StrokeWidth: 1.0,
+			},
 			Range: &chart.ContinuousRange{},
 			ValueFormatter: func(v interface{}) string {
 				if v, isFloat := v.(float64); isFloat {
