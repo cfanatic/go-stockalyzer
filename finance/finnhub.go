@@ -81,6 +81,7 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 	case M3:
 		resolution = finnhub.CandleResolutionMinute
 	case M6:
+		resolution = finnhub.CandleResolutionMinute
 	case Y1:
 	case Y5:
 	case Max:
@@ -116,6 +117,7 @@ func (fh *Finnhub) GetChart(duration Duration) *Candle {
 	case M3:
 		then = now.AddDate(0, -3, 0)
 	case M6:
+		then = now.AddDate(0, -6, 0)
 	case Y1:
 	case Y5:
 	case Max:

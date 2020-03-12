@@ -100,7 +100,7 @@ func Plot(stock IFinance) {
 			}
 		}
 		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
-	case M3:
+	case M3, M6:
 		time = *stock.XValues()
 		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: ""})
 		grid = []chart.GridLine{}
