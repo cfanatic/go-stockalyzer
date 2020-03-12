@@ -18,7 +18,7 @@ const (
 	M6
 	Y1
 	Y5
-	Max
+	Y30
 )
 
 type IFinance interface {
@@ -96,6 +96,32 @@ func Plot(stock IFinance) {
 			_, _, day2 := time[i+1].Date()
 			if day1 != day2 {
 				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("2006-01-02"))})
+				grid = append(grid, chart.GridLine{Value: float64(i + 1)})
+			}
+		}
+		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
+	case M3, M6, Y1:
+		time = *stock.XValues()
+		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: ""})
+		grid = []chart.GridLine{}
+		for i := 1; i < len(time)-1; i++ {
+			_, month1, _ := time[i].Date()
+			_, month2, _ := time[i+1].Date()
+			if month1 != month2 {
+				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("Jan"))})
+				grid = append(grid, chart.GridLine{Value: float64(i + 1)})
+			}
+		}
+		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
+	case Y5, Y30:
+		time = *stock.XValues()
+		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: ""})
+		grid = []chart.GridLine{}
+		for i := 1; i < len(time)-1; i++ {
+			year1, _, _ := time[i].Date()
+			year2, _, _ := time[i+1].Date()
+			if year1 != year2 {
+				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("2006"))})
 				grid = append(grid, chart.GridLine{Value: float64(i + 1)})
 			}
 		}
