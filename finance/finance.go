@@ -100,6 +100,19 @@ func Plot(stock IFinance) {
 			}
 		}
 		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
+	case M3:
+		time = *stock.XValues()
+		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: ""})
+		grid = []chart.GridLine{}
+		for i := 1; i < len(time)-1; i++ {
+			_, month1, _ := time[i].Date()
+			_, month2, _ := time[i+1].Date()
+			if month1 != month2 {
+				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("Jan"))})
+				grid = append(grid, chart.GridLine{Value: float64(i + 1)})
+			}
+		}
+		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
 	default:
 		panic("Unkown chart duration parameter during plot")
 	}

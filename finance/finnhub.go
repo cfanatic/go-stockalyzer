@@ -79,6 +79,7 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 	case D10:
 		resolution = finnhub.CandleResolution15Second
 	case M3:
+		resolution = finnhub.CandleResolutionMinute
 	case M6:
 	case Y1:
 	case Y5:
@@ -113,6 +114,7 @@ func (fh *Finnhub) GetChart(duration Duration) *Candle {
 	case D10:
 		then = now.AddDate(0, 0, fh.dateShift(now, 10))
 	case M3:
+		then = now.AddDate(0, -3, 0)
 	case M6:
 	case Y1:
 	case Y5:
@@ -171,14 +173,9 @@ func (fh *Finnhub) dateShift(start time.Time, days int) int {
 	case D1:
 		shift = -days - delta
 	case D5:
-		shift = -days - delta + 1
+		shift = -days - delta
 	case D10:
 		shift = -days - delta - 1
-	case M3:
-	case M6:
-	case Y1:
-	case Y5:
-	case Max:
 	default:
 		panic("Unknown chart duration parameter")
 	}
