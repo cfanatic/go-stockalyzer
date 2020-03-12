@@ -18,7 +18,7 @@ const (
 	M6
 	Y1
 	Y5
-	Max
+	Y30
 )
 
 type IFinance interface {
@@ -113,7 +113,7 @@ func Plot(stock IFinance) {
 			}
 		}
 		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
-	case Y5:
+	case Y5, Y30:
 		time = *stock.XValues()
 		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: ""})
 		grid = []chart.GridLine{}
