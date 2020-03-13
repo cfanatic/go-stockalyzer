@@ -3,8 +3,10 @@ package finance
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
+	"github.com/ryanuber/columnize"
 	"github.com/wcharczuk/go-chart"
 )
 
@@ -14,11 +16,13 @@ const (
 	D1 Duration = iota
 	D5
 	D10
+	M1
 	M3
 	M6
 	Y1
+	Y3
 	Y5
-	Y30
+	Max
 )
 
 type IFinance interface {
@@ -113,7 +117,7 @@ func Plot(stock IFinance) {
 			}
 		}
 		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
-	case Y5, Y30:
+	case Y5, Max:
 		time = *stock.XValues()
 		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: ""})
 		grid = []chart.GridLine{}
@@ -127,7 +131,7 @@ func Plot(stock IFinance) {
 		}
 		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
 	default:
-		panic("Unkown chart duration parameter during plot")
+		panic("Unkown duration parameter to plot stock chart")
 	}
 	graph := chart.Chart{
 		XAxis: chart.XAxis{
@@ -184,4 +188,68 @@ func Print(stock IFinance) {
 	for i := range time {
 		fmt.Printf("%3d | %+v | %+v | %v\n", i, time[i].Unix(), time[i], price[i])
 	}
+	fmt.Println()
+}
+
+func Performance(stock IFinance) {
+	var row strings.Builder
+	var out []string
+	var categories = []string{"Performance", "High", "Low"}
+	var durations = []Duration{D1, D10, M1, M3, Y1, Y3, Y5, Max}
+
+	getMax := func(values []float64) float64 {
+		max := 0.0
+		for _, value := range values {
+			if value > max {
+				max = value
+			}
+		}
+		return max
+	}
+	getMin := func(values []float64) float64 {
+		min := values[0]
+		for _, value := range values {
+			if value < min {
+				min = value
+			}
+		}
+		return min
+	}
+
+	config := columnize.DefaultConfig()
+	config.Glue = "      "
+
+	row.WriteString("| D1 | D10 | M1 | M3 | Y1 | Y3 | Y5 | Max")
+	out = append(out, row.String())
+	out = append(out, "")
+
+	for _, category := range categories {
+		row.Reset()
+		row.WriteString(fmt.Sprintf("%s |", category))
+		switch category {
+		case "Performance":
+			for _, duration := range durations {
+				stock.GetChart(duration)
+				yvalues := *stock.YValues()
+				row.WriteString(fmt.Sprintf("%.2f |", ((yvalues[len(yvalues)-1]-yvalues[0])/yvalues[0])*100))
+			}
+		case "High":
+			for _, duration := range durations {
+				stock.GetChart(duration)
+				yvalues := *stock.YValues()
+				row.WriteString(fmt.Sprintf("%.2f |", getMax(yvalues)))
+			}
+		case "Low":
+			for _, duration := range durations {
+				stock.GetChart(duration)
+				yvalues := *stock.YValues()
+				row.WriteString(fmt.Sprintf("%.2f |", getMin(yvalues)))
+			}
+		}
+		out = append(out, row.String())
+		out = append(out, "")
+	}
+
+	result := columnize.Format(out, config)
+	fmt.Println(result)
 }
