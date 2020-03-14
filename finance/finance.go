@@ -26,6 +26,8 @@ const (
 	Max
 )
 
+var Durations = []string{"D1", "D5", "D10", "M1", "M3", "M6", "Y1", "Y3", "Y5", "Max"}
+
 type IFinance interface {
 	GetProfile() *Profile
 	GetQuote() *Quote
@@ -182,7 +184,10 @@ func Plot(stock IFinance) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.MkdirAll(path, os.ModePerm)
 	}
-	f, _ := os.Create("misc/plot/output.png")
+	name := stock.GetProfile().Name
+	name = strings.Replace(name, " ", "_", -1)
+	name = name + "_" + Durations[*stock.Duration()]
+	f, _ := os.Create(fmt.Sprintf("misc/plot/%s.png", name))
 	defer f.Close()
 	graph.Render(chart.PNG, f)
 }
