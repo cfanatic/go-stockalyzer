@@ -74,7 +74,7 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 	switch *fh.Duration() {
 	case Intraday:
 		resolution = finnhub.CandleResolutionSecond
-	case D1, D5:
+	case D5:
 		resolution = finnhub.CandleResolution5Second
 	case D10:
 		resolution = finnhub.CandleResolution15Second
@@ -109,8 +109,6 @@ func (fh *Finnhub) GetChart(duration Duration) *Candle {
 	switch duration {
 	case Intraday:
 		then = now.AddDate(0, 0, fh.dateShift(now, 0))
-	case D1:
-		then = now.AddDate(0, 0, fh.dateShift(now, 1))
 	case D5:
 		then = now.AddDate(0, 0, fh.dateShift(now, 5))
 	case D10:
@@ -179,14 +177,6 @@ func (fh *Finnhub) dateShift(start time.Time, days int) int {
 			shift = -1
 		} else if start.Weekday() == time.Sunday {
 			shift = -2
-		}
-	case D1:
-		if start.Weekday() == time.Saturday {
-			shift = -2
-		} else if start.Weekday() == time.Sunday {
-			shift = -3
-		} else {
-			shift = -1
 		}
 	case D5:
 		for i := 0; i < days; i++ {
