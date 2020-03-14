@@ -106,7 +106,13 @@ func (fh *Finnhub) GetChart(duration Duration) *Candle {
 	now = time.Now()
 	switch duration {
 	case D1:
-		then = now.AddDate(0, 0, fh.dateShift(now, 0))
+		if now.Weekday() == time.Saturday {
+			then = now.AddDate(0, 0, -1)
+		} else if now.Weekday() == time.Sunday {
+			then = now.AddDate(0, 0, -2)
+		} else {
+			then = now.AddDate(0, 0, fh.dateShift(now, 0))
+		}
 	case D5:
 		then = now.AddDate(0, 0, fh.dateShift(now, 5))
 	case D10:
