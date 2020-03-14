@@ -7,6 +7,6 @@ deploy:
 
 clean:
 	rm -f bin/stockalyzer
-	rm -f bin/output.png
+	rm -f -r misc/plot
 
 all: deploy

@@ -3,6 +3,7 @@ package finance
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -177,7 +178,11 @@ func Plot(stock IFinance) {
 	graph.Elements = []chart.Renderable{
 		chart.Legend(&graph),
 	}
-	f, _ := os.Create("bin/output.png")
+	path, _ := filepath.Abs("misc/plot")
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.MkdirAll(path, os.ModePerm)
+	}
+	f, _ := os.Create("misc/plot/output.png")
 	defer f.Close()
 	graph.Render(chart.PNG, f)
 }
