@@ -14,7 +14,7 @@ import (
 type Duration int
 
 const (
-	D1 Duration = iota
+	Intraday Duration = iota
 	D5
 	D10
 	M1
@@ -26,7 +26,7 @@ const (
 	Max
 )
 
-var Durations = []string{"D1", "D5", "D10", "M1", "M3", "M6", "Y1", "Y3", "Y5", "Max"}
+var Durations = []string{"Intraday", "D5", "D10", "M1", "M3", "M6", "Y1", "Y3", "Y5", "Max"}
 
 type IFinance interface {
 	GetProfile() *Profile
@@ -81,7 +81,7 @@ func Plot(stock IFinance) {
 	var tick []chart.Tick
 	var grid []chart.GridLine
 	switch *stock.Duration() {
-	case D1:
+	case Intraday:
 		time = *stock.XValues()
 		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", time[0].Format("01-02 3PM"))})
 		grid = []chart.GridLine{}
@@ -206,7 +206,7 @@ func Performance(stock IFinance) {
 	var out []string
 	var quotes [](*[]float64)
 	var categories = []string{"Performance", "High", "Low"}
-	var durations = []Duration{D1, D10, M1, M3, Y1, Y3, Y5, Max}
+	var durations = []Duration{Intraday, D10, M1, M3, Y1, Y3, Y5, Max}
 
 	getMax := func(values []float64) float64 {
 		max := 0.0
@@ -235,7 +235,7 @@ func Performance(stock IFinance) {
 	config := columnize.DefaultConfig()
 	config.Glue = "      "
 
-	row.WriteString(fmt.Sprintf("%s | D1 | D10 | M1 | M3 | Y1 | Y3 | Y5 | Max", stock.GetProfile().Name))
+	row.WriteString(fmt.Sprintf("%s | Intraday | D10 | M1 | M3 | Y1 | Y3 | Y5 | Max", stock.GetProfile().Name))
 	out = append(out, row.String())
 	out = append(out, "")
 
