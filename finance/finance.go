@@ -15,6 +15,7 @@ type Duration int
 
 const (
 	Intraday Duration = iota
+	D1
 	D5
 	D10
 	M1
@@ -26,7 +27,7 @@ const (
 	Max
 )
 
-var Durations = []string{"Intraday", "D5", "D10", "M1", "M3", "M6", "Y1", "Y3", "Y5", "Max"}
+var Durations = []string{"Intraday", "D1", "D5", "D10", "M1", "M3", "M6", "Y1", "Y3", "Y5", "Max"}
 
 type IFinance interface {
 	GetProfile() *Profile
@@ -94,7 +95,7 @@ func Plot(stock IFinance) {
 			}
 		}
 		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
-	case D5, D10:
+	case D1, D5, D10:
 		time = *stock.XValues()
 		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", time[0].Format("2006-01-02"))})
 		grid = []chart.GridLine{}
