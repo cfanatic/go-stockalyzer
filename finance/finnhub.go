@@ -106,13 +106,7 @@ func (fh *Finnhub) GetChart(duration Duration) *Candle {
 	now = time.Now()
 	switch duration {
 	case Intraday:
-		if now.Weekday() == time.Saturday {
-			then = now.AddDate(0, 0, -1)
-		} else if now.Weekday() == time.Sunday {
-			then = now.AddDate(0, 0, -2)
-		} else {
-			then = now.AddDate(0, 0, fh.dateShift(now, 0))
-		}
+		then = now.AddDate(0, 0, fh.dateShift(now, 0))
 	case D5:
 		then = now.AddDate(0, 0, fh.dateShift(now, 5))
 	case D10:
@@ -175,18 +169,28 @@ func (fh *Finnhub) dateEqual(date1, date2 time.Time) bool {
 
 func (fh *Finnhub) dateShift(start time.Time, days int) int {
 	delta, shift := 0, 0
-	for i := 0; i < days; i++ {
-		if (start.AddDate(0, 0, -i)).Weekday() == time.Saturday ||
-			start.AddDate(0, 0, -i).Weekday() == time.Sunday {
-			delta++
-		}
-	}
 	switch *fh.Duration() {
 	case Intraday:
-		shift = -days - delta
+		if start.Weekday() == time.Saturday {
+			shift = -1
+		} else if start.Weekday() == time.Sunday {
+			shift = -2
+		}
 	case D5:
+		for i := 0; i < days; i++ {
+			if (start.AddDate(0, 0, -i)).Weekday() == time.Saturday ||
+				start.AddDate(0, 0, -i).Weekday() == time.Sunday {
+				delta++
+			}
+		}
 		shift = -days - delta
 	case D10:
+		for i := 0; i < days; i++ {
+			if (start.AddDate(0, 0, -i)).Weekday() == time.Saturday ||
+				start.AddDate(0, 0, -i).Weekday() == time.Sunday {
+				delta++
+			}
+		}
 		shift = -days - delta - 1
 	default:
 		panic("Unknown chart duration parameter")
