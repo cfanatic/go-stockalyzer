@@ -159,7 +159,7 @@ func Plot(stock IFinance) {
 		},
 		Series: []chart.Series{
 			chart.ContinuousSeries{
-				Name: *stock.Ticker(),
+				Name: stock.GetProfile().Name,
 				Style: chart.Style{
 					StrokeColor: chart.GetDefaultColor(0),
 				},
@@ -225,7 +225,7 @@ func Performance(stock IFinance) {
 	config := columnize.DefaultConfig()
 	config.Glue = "      "
 
-	row.WriteString("| D1 | D10 | M1 | M3 | Y1 | Y3 | Y5 | Max")
+	row.WriteString(fmt.Sprintf("%s | D1 | D10 | M1 | M3 | Y1 | Y3 | Y5 | Max", stock.GetProfile().Name))
 	out = append(out, row.String())
 	out = append(out, "")
 

@@ -12,6 +12,6 @@ func main() {
 	stock.GetChart(finance.D1)
 
 	// finance.Print(stock)
-	// finance.Plot(stock)
+	finance.Plot(stock)
 	finance.Performance(stock)
 }
