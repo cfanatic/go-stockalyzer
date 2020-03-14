@@ -194,7 +194,7 @@ func Print(stock IFinance) {
 func Performance(stock IFinance) {
 	var row strings.Builder
 	var out []string
-	var prices [](*[]float64)
+	var quotes [](*[]float64)
 	var categories = []string{"Performance", "High", "Low"}
 	var durations = []Duration{D1, D10, M1, M3, Y1, Y3, Y5, Max}
 
@@ -219,7 +219,7 @@ func Performance(stock IFinance) {
 
 	for _, duration := range durations {
 		stock.GetChart(duration)
-		prices = append(prices, stock.YValues())
+		quotes = append(quotes, stock.YValues())
 	}
 
 	config := columnize.DefaultConfig()
@@ -234,19 +234,19 @@ func Performance(stock IFinance) {
 		row.WriteString(fmt.Sprintf("%s |", category))
 		switch category {
 		case "Performance":
-			for _, tmp := range prices {
-				yvalues := *tmp
-				row.WriteString(fmt.Sprintf("%.2f%% |", ((yvalues[len(yvalues)-1]-yvalues[0])/yvalues[0])*100))
+			for _, tmp := range quotes {
+				quote := *tmp
+				row.WriteString(fmt.Sprintf("%.2f%% |", ((quote[len(quote)-1]-quote[0])/quote[0])*100))
 			}
 		case "High":
-			for _, tmp := range prices {
-				yvalues := *tmp
-				row.WriteString(fmt.Sprintf("%.2f |", getMax(yvalues)))
+			for _, tmp := range quotes {
+				quote := *tmp
+				row.WriteString(fmt.Sprintf("%.2f |", getMax(quote)))
 			}
 		case "Low":
-			for _, tmp := range prices {
-				yvalues := *tmp
-				row.WriteString(fmt.Sprintf("%.2f |", getMin(yvalues)))
+			for _, tmp := range quotes {
+				quote := *tmp
+				row.WriteString(fmt.Sprintf("%.2f |", getMin(quote)))
 			}
 		}
 		out = append(out, row.String())
