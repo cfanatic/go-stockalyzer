@@ -58,26 +58,18 @@ func (fh *Finnhub) GetQuote() *Quote {
 func (fh *Finnhub) GetCandle(from, to string) *Candle {
 	var resolution finnhub.CandleResolution
 	c := Candle{}
-	layout := "2006-01-02 15:04:05"
-	t1, _ := time.Parse(layout, from)
-	t2, _ := time.Parse(layout, to)
-	param := &finnhub.CandleParams{
-		Count: nil,
-		From:  &t1,
-		To:    &t2,
-	}
+	t1, _ := time.Parse("2006-01-02 15:04:05", from)
+	t2, _ := time.Parse("2006-01-02 15:04:05", to)
 	fh.dateDuration(t1, t2)
-	if fh.dateEqual(t1, t2) {
-		if t1.Weekday() == time.Saturday || t2.Weekday() == time.Sunday {
-			t1 = t1.AddDate(0, 0, fh.dateShift(t1, 0))
-		}
-	}
 	switch *fh.Duration() {
 	case Intraday:
+		t1 = t1.AddDate(0, 0, fh.dateShift(t1, 0))
 		resolution = finnhub.CandleResolutionSecond
 	case D5:
+		t1 = t1.AddDate(0, 0, fh.dateShift(t2, 5))
 		resolution = finnhub.CandleResolution5Second
 	case D10:
+		t1 = t1.AddDate(0, 0, fh.dateShift(t2, 10))
 		resolution = finnhub.CandleResolution15Second
 	case M1, M3, M6:
 		resolution = finnhub.CandleResolutionMinute
@@ -87,6 +79,11 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 		resolution = finnhub.CandleResolutionWeek
 	default:
 		panic("Unknown chart duration parameter")
+	}
+	param := &finnhub.CandleParams{
+		Count: nil,
+		From:  &t1,
+		To:    &t2,
 	}
 	if candle, err := fh.client.Stock.GetCandle(fh.Finance.Ticker, resolution, param); err == nil {
 		c.Close = candle.Close
@@ -108,13 +105,13 @@ func (fh *Finnhub) GetChart(duration Duration) *Candle {
 	now = time.Now()
 	switch duration {
 	case Intraday:
-		then = now.AddDate(0, 0, fh.dateShift(now, 0))
+		then = now.AddDate(0, 0, 0)
 	case D5:
-		then = now.AddDate(0, 0, fh.dateShift(now, 5))
+		then = now.AddDate(0, 0, -5)
 	case D10:
-		then = now.AddDate(0, 0, fh.dateShift(now, 10))
+		then = now.AddDate(0, 0, -10)
 	case M1:
-		then = now.AddDate(0, -3, 0)
+		then = now.AddDate(0, -1, 0)
 	case M3:
 		then = now.AddDate(0, -3, 0)
 	case M6:
@@ -185,7 +182,7 @@ func (fh *Finnhub) dateShift(start time.Time, days int) int {
 				delta++
 			}
 		}
-		shift = -days - delta
+		shift = -delta
 	case D10:
 		for i := 0; i < days; i++ {
 			if (start.AddDate(0, 0, -i)).Weekday() == time.Saturday ||
@@ -193,7 +190,7 @@ func (fh *Finnhub) dateShift(start time.Time, days int) int {
 				delta++
 			}
 		}
-		shift = -days - delta - 1
+		shift = -delta - 1
 	default:
 		panic("Unknown chart duration parameter")
 	}
@@ -201,29 +198,30 @@ func (fh *Finnhub) dateShift(start time.Time, days int) int {
 }
 
 func (fh *Finnhub) dateDuration(from, to time.Time) {
-	y1, m1, d1 := from.Date()
-	y2, m2, d2 := to.Date()
-	if y2-y1 > 5 {
-		fh.Finance.Duration = Max
-	} else if y2-y1 > 3 {
-		fh.Finance.Duration = Y5
-	} else if y2-y1 > 1 {
-		fh.Finance.Duration = Y3
-	} else if y2-y1 == 1 {
-		fh.Finance.Duration = Y1
-	} else if m2-m1 > 6 {
-		fh.Finance.Duration = Y1
-	} else if m2-m1 > 3 {
-		fh.Finance.Duration = M6
-	} else if m2-m1 > 1 {
-		fh.Finance.Duration = M3
-	} else if d2-d1 > 10 {
-		fh.Finance.Duration = M1
-	} else if d2-d1 > 5 {
-		fh.Finance.Duration = D10
-	} else if d2-d1 > 1 {
-		fh.Finance.Duration = D5
-	} else {
+	t1, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-%02d-%02d", from.Year(), from.Month(), from.Day()))
+	t2, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-%02d-%02d", to.Year(), to.Month(), to.Day()))
+	switch diff := t2.Sub(t1).Hours(); {
+	case diff <= 24:
 		fh.Finance.Duration = Intraday
+	case diff <= 24*5:
+		fh.Finance.Duration = D5
+	case diff <= 24*10:
+		fh.Finance.Duration = D10
+	case diff <= 24*31*1:
+		fh.Finance.Duration = M1
+	case diff <= 24*31*3:
+		fh.Finance.Duration = M3
+	case diff <= 24*31*6:
+		fh.Finance.Duration = M6
+	case diff <= 24*31*12:
+		fh.Finance.Duration = Y1
+	case diff <= 24*31*12*3:
+		fh.Finance.Duration = Y3
+	case diff <= 24*31*12*5:
+		fh.Finance.Duration = Y5
+	case diff > 24*31*12*5:
+		fh.Finance.Duration = Max
+	default:
+		panic("Unknown date duration")
 	}
 }
