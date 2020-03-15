@@ -26,7 +26,18 @@ const (
 	Max
 )
 
-var Durations = []string{"Intraday", "D5", "D10", "M1", "M3", "M6", "Y1", "Y3", "Y5", "Max"}
+var Durations = [...]string{
+	"Intraday",
+	"D5",
+	"D10",
+	"M1",
+	"M3",
+	"M6",
+	"Y1",
+	"Y3",
+	"Y5",
+	"Max",
+}
 
 type IFinance interface {
 	GetProfile() *Profile
