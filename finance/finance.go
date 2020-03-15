@@ -203,15 +203,6 @@ func Plot(stock IFinance) {
 	graph.Render(chart.PNG, f)
 }
 
-func Print(stock IFinance) {
-	time := *stock.XValues()
-	price := *stock.YValues()
-	for i := range time {
-		fmt.Printf("%3d | %+v | %+v | %v\n", i, time[i].Unix(), time[i], price[i])
-	}
-	fmt.Println()
-}
-
 func Performance(stock IFinance) {
 	var row strings.Builder
 	var out []string
@@ -281,4 +272,13 @@ func Performance(stock IFinance) {
 
 	result := columnize.Format(out, config)
 	fmt.Println(result)
+}
+
+func Print(stock IFinance) {
+	time := *stock.XValues()
+	price := *stock.YValues()
+	for i := range time {
+		fmt.Printf("%3d | %+v | %+v | %v\n", i, time[i].Unix(), time[i], price[i])
+	}
+	fmt.Println()
 }
