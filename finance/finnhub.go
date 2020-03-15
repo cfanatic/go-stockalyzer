@@ -66,9 +66,10 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 		From:  &t1,
 		To:    &t2,
 	}
+	fh.dateDuration(t1, t2)
 	if fh.dateEqual(t1, t2) {
 		if t1.Weekday() == time.Saturday || t2.Weekday() == time.Sunday {
-			panic("Stock market is closed on weekends")
+			t1 = t1.AddDate(0, 0, fh.dateShift(t1, 0))
 		}
 	}
 	switch *fh.Duration() {
@@ -104,7 +105,6 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 func (fh *Finnhub) GetChart(duration Duration) *Candle {
 	var from, to string
 	var now, then time.Time
-	fh.Finance.Duration = duration
 	now = time.Now()
 	switch duration {
 	case Intraday:
@@ -198,4 +198,32 @@ func (fh *Finnhub) dateShift(start time.Time, days int) int {
 		panic("Unknown chart duration parameter")
 	}
 	return shift
+}
+
+func (fh *Finnhub) dateDuration(from, to time.Time) {
+	y1, m1, d1 := from.Date()
+	y2, m2, d2 := to.Date()
+	if y2-y1 > 5 {
+		fh.Finance.Duration = Max
+	} else if y2-y1 > 3 {
+		fh.Finance.Duration = Y5
+	} else if y2-y1 > 1 {
+		fh.Finance.Duration = Y3
+	} else if y2-y1 == 1 {
+		fh.Finance.Duration = Y1
+	} else if m2-m1 > 6 {
+		fh.Finance.Duration = Y1
+	} else if m2-m1 > 3 {
+		fh.Finance.Duration = M6
+	} else if m2-m1 > 1 {
+		fh.Finance.Duration = M3
+	} else if d2-d1 > 10 {
+		fh.Finance.Duration = M1
+	} else if d2-d1 > 5 {
+		fh.Finance.Duration = D10
+	} else if d2-d1 > 1 {
+		fh.Finance.Duration = D5
+	} else {
+		fh.Finance.Duration = Intraday
+	}
 }
