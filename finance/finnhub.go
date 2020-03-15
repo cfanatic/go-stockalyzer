@@ -160,10 +160,33 @@ func (fh *Finnhub) YValues() *[]float64 {
 	return &fh.Finance.Candle.Open
 }
 
-func (fh *Finnhub) dateEqual(date1, date2 time.Time) bool {
-	y1, m1, d1 := date1.Date()
-	y2, m2, d2 := date2.Date()
-	return y1 == y2 && m1 == m2 && d1 == d2
+func (fh *Finnhub) dateDuration(from, to time.Time) {
+	t1, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-%02d-%02d", from.Year(), from.Month(), from.Day()))
+	t2, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-%02d-%02d", to.Year(), to.Month(), to.Day()))
+	switch diff := t2.Sub(t1).Hours(); {
+	case diff <= 24:
+		fh.Finance.Duration = Intraday
+	case diff <= 24*5:
+		fh.Finance.Duration = D5
+	case diff <= 24*10:
+		fh.Finance.Duration = D10
+	case diff <= 24*31*1:
+		fh.Finance.Duration = M1
+	case diff <= 24*31*3:
+		fh.Finance.Duration = M3
+	case diff <= 24*31*6:
+		fh.Finance.Duration = M6
+	case diff <= 24*31*12:
+		fh.Finance.Duration = Y1
+	case diff <= 24*31*12*3:
+		fh.Finance.Duration = Y3
+	case diff <= 24*31*12*5:
+		fh.Finance.Duration = Y5
+	case diff > 24*31*12*5:
+		fh.Finance.Duration = Max
+	default:
+		panic("Unknown date duration")
+	}
 }
 
 func (fh *Finnhub) dateShift(start time.Time, days int) int {
@@ -195,33 +218,4 @@ func (fh *Finnhub) dateShift(start time.Time, days int) int {
 		panic("Unknown chart duration parameter")
 	}
 	return shift
-}
-
-func (fh *Finnhub) dateDuration(from, to time.Time) {
-	t1, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-%02d-%02d", from.Year(), from.Month(), from.Day()))
-	t2, _ := time.Parse("2006-01-02", fmt.Sprintf("%d-%02d-%02d", to.Year(), to.Month(), to.Day()))
-	switch diff := t2.Sub(t1).Hours(); {
-	case diff <= 24:
-		fh.Finance.Duration = Intraday
-	case diff <= 24*5:
-		fh.Finance.Duration = D5
-	case diff <= 24*10:
-		fh.Finance.Duration = D10
-	case diff <= 24*31*1:
-		fh.Finance.Duration = M1
-	case diff <= 24*31*3:
-		fh.Finance.Duration = M3
-	case diff <= 24*31*6:
-		fh.Finance.Duration = M6
-	case diff <= 24*31*12:
-		fh.Finance.Duration = Y1
-	case diff <= 24*31*12*3:
-		fh.Finance.Duration = Y3
-	case diff <= 24*31*12*5:
-		fh.Finance.Duration = Y5
-	case diff > 24*31*12*5:
-		fh.Finance.Duration = Max
-	default:
-		panic("Unknown date duration")
-	}
 }
