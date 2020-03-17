@@ -206,7 +206,7 @@ func Plot(stock IFinance) {
 func Performance(stock IFinance) {
 	var row strings.Builder
 	var out []string
-	var quotes [](*[]float64)
+	var candles [](*[]float64)
 	var categories = []string{"Performance", "High", "Low"}
 	var durations = []Duration{Intraday, D10, M1, M3, Y1, Y3, Y5, Max}
 
@@ -231,7 +231,7 @@ func Performance(stock IFinance) {
 
 	for _, duration := range durations {
 		stock.GetChart(duration)
-		quotes = append(quotes, stock.YValues())
+		candles = append(candles, stock.YValues())
 	}
 
 	config := columnize.DefaultConfig()
@@ -246,24 +246,24 @@ func Performance(stock IFinance) {
 		row.WriteString(fmt.Sprintf("%s |", category))
 		switch category {
 		case "Performance":
-			for i, tmp := range quotes {
+			quote := stock.GetQuote()
+			for i, tmp := range candles {
 				if i > 0 {
-					quote := *tmp
-					row.WriteString(fmt.Sprintf("%.2f%% |", ((quote[len(quote)-1]-quote[0])/quote[0])*100))
+					candle := *tmp
+					row.WriteString(fmt.Sprintf("%.2f%% |", ((quote.Current-candle[0])/candle[0])*100))
 				} else {
-					quote := stock.GetQuote()
 					row.WriteString(fmt.Sprintf("%.2f%% |", ((quote.Current-quote.PrevClose)/quote.PrevClose)*100))
 				}
 			}
 		case "High":
-			for _, tmp := range quotes {
-				quote := *tmp
-				row.WriteString(fmt.Sprintf("%.2f |", getMax(quote)))
+			for _, tmp := range candles {
+				candle := *tmp
+				row.WriteString(fmt.Sprintf("%.2f |", getMax(candle)))
 			}
 		case "Low":
-			for _, tmp := range quotes {
-				quote := *tmp
-				row.WriteString(fmt.Sprintf("%.2f |", getMin(quote)))
+			for _, tmp := range candles {
+				candle := *tmp
+				row.WriteString(fmt.Sprintf("%.2f |", getMin(candle)))
 			}
 		}
 		out = append(out, row.String())
