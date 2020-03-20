@@ -33,6 +33,9 @@ func (fh *Finnhub) GetProfile() *Profile {
 		p.GICSSector = profile.GICSSector
 		p.ISIN = profile.ISIN
 		p.Name = profile.Name
+		if p.Name == "" {
+			p.Name = *fh.Ticker()
+		}
 		fh.Finance.Profile = &p
 	} else {
 		fh.err = err
