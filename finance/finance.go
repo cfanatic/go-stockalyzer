@@ -229,6 +229,15 @@ func Performance(stock IFinance) {
 		return min
 	}
 
+	stopwatch := func() func() {
+		start := time.Now()
+		return func() {
+			fmt.Printf("Time: %.2f seconds\n", time.Since(start).Seconds())
+		}
+	}
+
+	defer stopwatch()()
+
 	for _, duration := range durations {
 		stock.GetChart(duration)
 		candles = append(candles, stock.YValues())
