@@ -123,7 +123,7 @@ func Plot(stock IFinance) {
 			}
 		}
 		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
-	case M1, M3, M6, Y1:
+	case M3, M6, Y1:
 		time = *stock.XValues()
 		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: ""})
 		grid = []chart.GridLine{}
@@ -150,7 +150,7 @@ func Plot(stock IFinance) {
 		}
 		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
 	default:
-		panic("Unkown duration parameter to plot stock chart")
+		panic("Unsupported duration parameter to plot stock chart")
 	}
 	graph := chart.Chart{
 		Width:  1280,
@@ -232,6 +232,7 @@ func Performance(stock IFinance) {
 		categories = []string{"Performance", "High", "Low"}
 		durations  = []Duration{Intraday, D10, M1, M3, Y1, Y3, Y5, Max}
 	)
+	
 	stopwatch := func() func() {
 		start := time.Now()
 		return func() {
