@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -91,6 +92,8 @@ func Plot(stock IFinance) {
 	var time []time.Time
 	var tick []chart.Tick
 	var grid []chart.GridLine
+	minIndex, minValue := minValue(stock.YValues())
+	maxIndex, maxValue := maxValue(stock.YValues())
 	switch *stock.Duration() {
 	case Intraday:
 		time = *stock.XValues()
@@ -148,6 +151,13 @@ func Plot(stock IFinance) {
 		panic("Unkown duration parameter to plot stock chart")
 	}
 	graph := chart.Chart{
+		Width:  1280,
+		Height: 720,
+		Background: chart.Style{
+			Padding: chart.Box{
+				Top: 75,
+			},
+		},
 		XAxis: chart.XAxis{
 			GridMajorStyle: chart.Style{
 				StrokeColor: chart.ColorAlternateLightGray,
@@ -186,10 +196,19 @@ func Plot(stock IFinance) {
 				}(),
 				YValues: *stock.YValues(),
 			},
+			chart.AnnotationSeries{
+				Annotations: []chart.Value2{
+					{XValue: float64(minIndex), YValue: minValue, Label: strconv.FormatInt(int64(minValue), 10)},
+					{XValue: float64(maxIndex), YValue: maxValue, Label: strconv.FormatInt(int64(maxValue), 10)},
+				},
+				Style: chart.Style{
+					StrokeColor: chart.GetDefaultColor(0),
+				},
+			},
 		},
 	}
 	graph.Elements = []chart.Renderable{
-		chart.Legend(&graph),
+		chart.LegendThin(&graph),
 	}
 	path, _ := filepath.Abs("misc/plot")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -210,32 +229,12 @@ func Performance(stock IFinance) {
 	var categories = []string{"Performance", "High", "Low"}
 	var durations = []Duration{Intraday, D10, M1, M3, Y1, Y3, Y5, Max}
 
-	getMax := func(values []float64) float64 {
-		max := 0.0
-		for _, value := range values {
-			if value > max {
-				max = value
-			}
-		}
-		return max
-	}
-	getMin := func(values []float64) float64 {
-		min := values[0]
-		for _, value := range values {
-			if value < min {
-				min = value
-			}
-		}
-		return min
-	}
-
 	stopwatch := func() func() {
 		start := time.Now()
 		return func() {
 			fmt.Printf("Time: %.2f seconds\n", time.Since(start).Seconds())
 		}
 	}
-
 	defer stopwatch()()
 
 	for _, duration := range durations {
@@ -243,13 +242,9 @@ func Performance(stock IFinance) {
 		candles = append(candles, stock.YValues())
 	}
 
-	config := columnize.DefaultConfig()
-	config.Glue = "      "
-
 	row.WriteString(fmt.Sprintf("%s | Intraday | D10 | M1 | M3 | Y1 | Y3 | Y5 | Max", stock.GetProfile().Name))
 	out = append(out, row.String())
 	out = append(out, "")
-
 	for _, category := range categories {
 		row.Reset()
 		row.WriteString(fmt.Sprintf("%s |", category))
@@ -265,20 +260,21 @@ func Performance(stock IFinance) {
 				}
 			}
 		case "High":
-			for _, tmp := range candles {
-				candle := *tmp
-				row.WriteString(fmt.Sprintf("%.2f |", getMax(candle)))
+			for _, candle := range candles {
+				_, maxValue := maxValue(candle)
+				row.WriteString(fmt.Sprintf("%.2f |", maxValue))
 			}
 		case "Low":
-			for _, tmp := range candles {
-				candle := *tmp
-				row.WriteString(fmt.Sprintf("%.2f |", getMin(candle)))
+			for _, candle := range candles {
+				_, minValue := minValue(candle)
+				row.WriteString(fmt.Sprintf("%.2f |", minValue))
 			}
 		}
 		out = append(out, row.String())
 		out = append(out, "")
 	}
-
+	config := columnize.DefaultConfig()
+	config.Glue = "      "
 	result := columnize.Format(out, config)
 	fmt.Println(result)
 }
@@ -290,4 +286,26 @@ func Print(stock IFinance) {
 		fmt.Printf("%3d | %+v | %+v | %v\n", i, time[i].Unix(), time[i], price[i])
 	}
 	fmt.Println()
+}
+
+func maxValue(values *[]float64) (int, float64) {
+	idx, max := 0, 0.0
+	for i, value := range *values {
+		if value > max {
+			idx = i
+			max = value
+		}
+	}
+	return idx, max
+}
+
+func minValue(values *[]float64) (int, float64) {
+	idx, min := 0, (*values)[0]
+	for i, value := range *values {
+		if value < min {
+			idx = i
+			min = value
+		}
+	}
+	return idx, min
 }
