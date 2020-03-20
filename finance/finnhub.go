@@ -103,8 +103,10 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 }
 
 func (fh *Finnhub) GetChart(duration Duration) *Candle {
-	var from, to string
-	var now, then time.Time
+	var (
+		from, to  string
+		now, then time.Time
+	)
 	now = time.Now()
 	switch duration {
 	case Intraday:

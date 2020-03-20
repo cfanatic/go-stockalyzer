@@ -89,9 +89,11 @@ type Candle struct {
 }
 
 func Plot(stock IFinance) {
-	var time []time.Time
-	var tick []chart.Tick
-	var grid []chart.GridLine
+	var (
+		time []time.Time
+		tick []chart.Tick
+		grid []chart.GridLine
+	)
 	minIndex, minValue := minValue(stock.YValues())
 	maxIndex, maxValue := maxValue(stock.YValues())
 	switch *stock.Duration() {
@@ -223,12 +225,13 @@ func Plot(stock IFinance) {
 }
 
 func Performance(stock IFinance) {
-	var row strings.Builder
-	var out []string
-	var candles [](*[]float64)
-	var categories = []string{"Performance", "High", "Low"}
-	var durations = []Duration{Intraday, D10, M1, M3, Y1, Y3, Y5, Max}
-
+	var (
+		row        strings.Builder
+		out        []string
+		candles    [](*[]float64)
+		categories = []string{"Performance", "High", "Low"}
+		durations  = []Duration{Intraday, D10, M1, M3, Y1, Y3, Y5, Max}
+	)
 	stopwatch := func() func() {
 		start := time.Now()
 		return func() {
