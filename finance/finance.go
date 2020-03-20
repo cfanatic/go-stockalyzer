@@ -240,14 +240,13 @@ func Performance(stock IFinance) {
 	}
 	defer stopwatch()()
 
+	row.WriteString(fmt.Sprintf("%s | Intraday | D10 | M1 | M3 | Y1 | Y3 | Y5 | Max", stock.GetProfile().Name))
+	out = append(out, row.String())
+	out = append(out, "")
 	for _, duration := range durations {
 		stock.GetChart(duration)
 		candles = append(candles, stock.YValues())
 	}
-
-	row.WriteString(fmt.Sprintf("%s | Intraday | D10 | M1 | M3 | Y1 | Y3 | Y5 | Max", stock.GetProfile().Name))
-	out = append(out, row.String())
-	out = append(out, "")
 	for _, category := range categories {
 		row.Reset()
 		row.WriteString(fmt.Sprintf("%s |", category))
@@ -257,7 +256,7 @@ func Performance(stock IFinance) {
 			for i, tmp := range candles {
 				if i > 0 {
 					candle := *tmp
-					row.WriteString(fmt.Sprintf("%.2f%% |", ((quote.Current-candle[0])/candle[0])*100))
+					row.WriteString(fmt.Sprintf("%.2f%% |", ((quote.PrevClose-candle[0])/candle[0])*100))
 				} else {
 					row.WriteString(fmt.Sprintf("%.2f%% |", ((quote.Current-quote.PrevClose)/quote.PrevClose)*100))
 				}
