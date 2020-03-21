@@ -185,7 +185,7 @@ func Plot(stock IFinance) {
 		},
 		Series: []chart.Series{
 			chart.ContinuousSeries{
-				Name: stock.Profile().Name + " - " + fmt.Sprintf("%s", Durations[*stock.Duration()]),
+				Name: time.Now().Format("2006/01/02") + " - " + stock.Profile().Name + " - " + fmt.Sprintf("%s", Durations[*stock.Duration()]),
 				Style: chart.Style{
 					StrokeColor: chart.GetDefaultColor(0),
 				},

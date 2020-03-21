@@ -11,7 +11,7 @@ import (
 const (
 	mode     = "plots"
 	duration = finance.Max
-	sleep    = 500
+	sleep    = 250
 	company  = "ADS.DE"
 )
 
