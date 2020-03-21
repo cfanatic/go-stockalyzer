@@ -1,4 +1,11 @@
 # Stockalyzer configuration
 
+[general]
+chartsize = [1280, 720]
+markethours = [17, 30]
+stocks = [
+    "ADS.DE",
+]
+
 [finnhub]
 token = ""

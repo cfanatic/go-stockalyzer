@@ -17,7 +17,7 @@ type Finnhub struct {
 }
 
 func NewFinnhub(symbol string) *Finnhub {
-	token := configuration.Get(configuration.FINNHUB_TOKEN).(string)
+	token := configuration.Token()
 	c := client.New(token)
 	p := Profile{}
 	fh := Finnhub{client: *c, Finance: Finance{Ticker: symbol}, err: nil}

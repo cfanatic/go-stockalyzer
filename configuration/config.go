@@ -10,9 +10,11 @@ import (
 type keys int
 
 const (
-	PATH_R             = "misc/config.toml"
-	PATH_D             = "../../misc/config.toml"
-	FINNHUB_TOKEN keys = iota
+	PATH_R           = "misc/config.toml"
+	PATH_D           = "../../misc/config.toml"
+	MARKETHOURS keys = iota
+	CHARTSIZE
+	TOKEN
 )
 
 var (
@@ -20,7 +22,13 @@ var (
 )
 
 type config struct {
+	General general
 	Finnhub finnhub
+}
+
+type general struct {
+	MarketHours []int
+	ChartSize   []int
 }
 
 type finnhub struct {
@@ -41,9 +49,27 @@ func Get(key keys) interface{} {
 		panic(err)
 	}
 	switch key {
-	case FINNHUB_TOKEN:
+	case MARKETHOURS:
+		return conf.General.MarketHours
+	case CHARTSIZE:
+		return conf.General.ChartSize
+	case TOKEN:
 		return conf.Finnhub.Token
 	default:
 		return nil
 	}
+}
+
+func MarketHours() (int, int) {
+	tmp := Get(MARKETHOURS).([]int)
+	return tmp[0], tmp[1]
+}
+
+func ChartSize() (int, int) {
+	tmp := Get(CHARTSIZE).([]int)
+	return tmp[0], tmp[1]
+}
+
+func Token() string {
+	return Get(TOKEN).(string)
 }

@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cfanatic/stockalyzer/configuration"
 	"github.com/ryanuber/columnize"
 	"github.com/wcharczuk/go-chart"
 )
@@ -94,6 +95,7 @@ func Plot(stock IFinance) {
 		tick  []chart.Tick
 		grid  []chart.GridLine
 	)
+	chartWidth, chartHeight := configuration.ChartSize()
 	minIndex, minValue := minValue(stock.YValues())
 	maxIndex, maxValue := maxValue(stock.YValues())
 	switch *stock.Duration() {
@@ -153,8 +155,8 @@ func Plot(stock IFinance) {
 		panic("Unsupported duration parameter to plot stock chart")
 	}
 	graph := chart.Chart{
-		Width:  1280,
-		Height: 720,
+		Width:  chartWidth,
+		Height: chartHeight,
 		Background: chart.Style{
 			Padding: chart.Box{
 				Top: 75,
@@ -302,7 +304,8 @@ func openMarket() bool {
 	if day == time.Saturday || day == time.Sunday {
 		open = false
 	} else {
-		if hour >= 17 && min >= 30 {
+		closeHour, closeMin := configuration.MarketHours()
+		if hour >= closeHour && min >= closeMin {
 			open = false
 		} else {
 			open = true
