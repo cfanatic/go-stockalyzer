@@ -185,7 +185,7 @@ func Plot(stock IFinance) {
 		},
 		Series: []chart.Series{
 			chart.ContinuousSeries{
-				Name: stock.GetProfile().Name,
+				Name: stock.GetProfile().Name + " - " + fmt.Sprintf("%s", Durations[*stock.Duration()]),
 				Style: chart.Style{
 					StrokeColor: chart.GetDefaultColor(0),
 				},
@@ -232,7 +232,6 @@ func Performance(stock IFinance) {
 		categories = []string{"Performance", "High", "Low"}
 		durations  = []Duration{Intraday, D10, M1, M3, Y1, Y3, Y5, Max}
 	)
-	
 	stopwatch := func() func() {
 		start := time.Now()
 		return func() {
@@ -240,7 +239,6 @@ func Performance(stock IFinance) {
 		}
 	}
 	defer stopwatch()()
-
 	row.WriteString(fmt.Sprintf("%s | Intraday | D10 | M1 | M3 | Y1 | Y3 | Y5 | Max", stock.GetProfile().Name))
 	out = append(out, row.String())
 	out = append(out, "")
@@ -257,7 +255,11 @@ func Performance(stock IFinance) {
 			for i, tmp := range candles {
 				if i > 0 {
 					candle := *tmp
-					row.WriteString(fmt.Sprintf("%.2f%% |", ((quote.PrevClose-candle[0])/candle[0])*100))
+					if openMarket() == true {
+						row.WriteString(fmt.Sprintf("%.2f%% |", ((quote.PrevClose-candle[0])/candle[0])*100))
+					} else {
+						row.WriteString(fmt.Sprintf("%.2f%% |", ((quote.Current-candle[0])/candle[0])*100))
+					}
 				} else {
 					row.WriteString(fmt.Sprintf("%.2f%% |", ((quote.Current-quote.PrevClose)/quote.PrevClose)*100))
 				}
@@ -289,6 +291,24 @@ func Print(stock IFinance) {
 		fmt.Printf("%3d | %+v | %+v | %v\n", i, time[i].Unix(), time[i], price[i])
 	}
 	fmt.Println()
+}
+
+func openMarket() bool {
+	var open bool
+	current := time.Now()
+	day := current.Weekday()
+	hour := current.Hour()
+	min := current.Minute()
+	if day == time.Saturday || day == time.Sunday {
+		open = false
+	} else {
+		if hour >= 17 && min >= 30 {
+			open = false
+		} else {
+			open = true
+		}
+	}
+	return open
 }
 
 func maxValue(values *[]float64) (int, float64) {
