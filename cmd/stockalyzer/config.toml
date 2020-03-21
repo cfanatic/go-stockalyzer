@@ -1,7 +1,7 @@
 # Stockalyzer configuration
 
 [general]
-chartsize = [1280, 720]
+chartsize = [1000, 600]
 markethours = [17, 30]
 stocks = [
     "ADS.DE",

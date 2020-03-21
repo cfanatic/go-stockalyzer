@@ -214,14 +214,14 @@ func Plot(stock IFinance) {
 	graph.Elements = []chart.Renderable{
 		chart.LegendThin(&graph),
 	}
-	path, _ := filepath.Abs("misc/plot")
+	path, _ := filepath.Abs("misc/output")
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.MkdirAll(path, os.ModePerm)
 	}
 	name := stock.Profile().Name
 	name = strings.Replace(name, " ", "_", -1)
 	name = name + "_" + Durations[*stock.Duration()]
-	f, _ := os.Create(fmt.Sprintf("misc/plot/%s.png", name))
+	f, _ := os.Create(fmt.Sprintf("misc/output/%s.png", name))
 	defer f.Close()
 	graph.Render(chart.PNG, f)
 }
