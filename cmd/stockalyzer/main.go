@@ -1,15 +1,18 @@
 package main
 
 import (
+	"log"
+	"os"
 	"time"
 
 	"github.com/cfanatic/stockalyzer/finance"
 )
 
 const (
-	mode     = "plot"
-	duration = finance.D5
-	sleep    = 5
+	mode     = "plots"
+	duration = finance.Max
+	sleep    = 500
+	company  = "ADS.DE"
 )
 
 var (
@@ -29,18 +32,21 @@ var (
 func main() {
 	var stock finance.IFinance
 
-	switch stock = finance.NewFinnhub("ADS.DE"); mode {
+	log.SetOutput(os.Stdout)
+
+	switch stock = finance.NewFinnhub(company); mode {
 	case "print":
 		stock.GetCandle("2020-03-01 08:00:00", "2020-03-10 22:00:00")
 		finance.Print(stock)
 	case "plot":
 		stock.GetChart(duration)
 		finance.Plot(stock)
-	case "plots": // buggy: panic is thrown due to request limit
+	case "plots":
 		for _, duration := range durations {
+			log.Println("Plotting chart for " + finance.Durations[duration])
 			stock.GetChart(duration)
 			finance.Plot(stock)
-			time.Sleep(sleep * time.Second)
+			time.Sleep(sleep * time.Millisecond)
 		}
 	case "performance":
 		finance.Performance(stock)

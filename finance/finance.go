@@ -41,11 +41,11 @@ var Durations = [...]string{
 }
 
 type IFinance interface {
-	GetProfile() *Profile
 	GetQuote() *Quote
 	GetCandle(from, to string) *Candle
 	GetChart(duration Duration) *Candle
 
+	Profile() *Profile
 	Ticker() *string
 	Duration() *Duration
 	XValues() *[]time.Time
@@ -185,7 +185,7 @@ func Plot(stock IFinance) {
 		},
 		Series: []chart.Series{
 			chart.ContinuousSeries{
-				Name: stock.GetProfile().Name + " - " + fmt.Sprintf("%s", Durations[*stock.Duration()]),
+				Name: stock.Profile().Name + " - " + fmt.Sprintf("%s", Durations[*stock.Duration()]),
 				Style: chart.Style{
 					StrokeColor: chart.GetDefaultColor(0),
 				},
@@ -216,7 +216,7 @@ func Plot(stock IFinance) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.MkdirAll(path, os.ModePerm)
 	}
-	name := stock.GetProfile().Name
+	name := stock.Profile().Name
 	name = strings.Replace(name, " ", "_", -1)
 	name = name + "_" + Durations[*stock.Duration()]
 	f, _ := os.Create(fmt.Sprintf("misc/plot/%s.png", name))
@@ -239,7 +239,7 @@ func Performance(stock IFinance) {
 		}
 	}
 	defer stopwatch()()
-	row.WriteString(fmt.Sprintf("%s | Intraday | D10 | M1 | M3 | Y1 | Y3 | Y5 | Max", stock.GetProfile().Name))
+	row.WriteString(fmt.Sprintf("%s | Intraday | D10 | M1 | M3 | Y1 | Y3 | Y5 | Max", stock.Profile().Name))
 	out = append(out, row.String())
 	out = append(out, "")
 	for _, duration := range durations {
