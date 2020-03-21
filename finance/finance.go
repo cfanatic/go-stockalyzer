@@ -90,65 +90,65 @@ type Candle struct {
 
 func Plot(stock IFinance) {
 	var (
-		time []time.Time
-		tick []chart.Tick
-		grid []chart.GridLine
+		times []time.Time
+		tick  []chart.Tick
+		grid  []chart.GridLine
 	)
 	minIndex, minValue := minValue(stock.YValues())
 	maxIndex, maxValue := maxValue(stock.YValues())
 	switch *stock.Duration() {
 	case Intraday:
-		time = *stock.XValues()
-		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", time[0].Format("01-02 3PM"))})
+		times = *stock.XValues()
+		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", times[0].Format("01-02 3PM"))})
 		grid = []chart.GridLine{}
-		for i := 1; i < len(time)-1; i++ {
-			hour1, _, _ := time[i].Clock()
-			hour2, _, _ := time[i+1].Clock()
+		for i := 1; i < len(times)-1; i++ {
+			hour1, _, _ := times[i].Clock()
+			hour2, _, _ := times[i+1].Clock()
 			if hour1 != hour2 {
-				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("01-02 3PM"))})
+				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", times[i+1].Format("01-02 3PM"))})
 				grid = append(grid, chart.GridLine{Value: float64(i + 1)})
 			}
 		}
-		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
+		tick = append(tick, chart.Tick{Value: float64(len(times)), Label: ""})
 	case D5, D10:
-		time = *stock.XValues()
-		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", time[0].Format("2006-01-02"))})
+		times = *stock.XValues()
+		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: fmt.Sprintf("%s", times[0].Format("2006-01-02"))})
 		grid = []chart.GridLine{}
-		for i := 1; i < len(time)-1; i++ {
-			_, _, day1 := time[i].Date()
-			_, _, day2 := time[i+1].Date()
+		for i := 1; i < len(times)-1; i++ {
+			_, _, day1 := times[i].Date()
+			_, _, day2 := times[i+1].Date()
 			if day1 != day2 {
-				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("2006-01-02"))})
+				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", times[i+1].Format("2006-01-02"))})
 				grid = append(grid, chart.GridLine{Value: float64(i + 1)})
 			}
 		}
-		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
+		tick = append(tick, chart.Tick{Value: float64(len(times)), Label: ""})
 	case M3, M6, Y1:
-		time = *stock.XValues()
+		times = *stock.XValues()
 		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: ""})
 		grid = []chart.GridLine{}
-		for i := 1; i < len(time)-1; i++ {
-			_, month1, _ := time[i].Date()
-			_, month2, _ := time[i+1].Date()
+		for i := 1; i < len(times)-1; i++ {
+			_, month1, _ := times[i].Date()
+			_, month2, _ := times[i+1].Date()
 			if month1 != month2 {
-				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("Jan"))})
+				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", times[i+1].Format("Jan"))})
 				grid = append(grid, chart.GridLine{Value: float64(i + 1)})
 			}
 		}
-		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
+		tick = append(tick, chart.Tick{Value: float64(len(times)), Label: ""})
 	case Y3, Y5, Max:
-		time = *stock.XValues()
+		times = *stock.XValues()
 		tick = append([]chart.Tick{}, chart.Tick{Value: float64(0), Label: ""})
 		grid = []chart.GridLine{}
-		for i := 1; i < len(time)-1; i++ {
-			year1, _, _ := time[i].Date()
-			year2, _, _ := time[i+1].Date()
+		for i := 1; i < len(times)-1; i++ {
+			year1, _, _ := times[i].Date()
+			year2, _, _ := times[i+1].Date()
 			if year1 != year2 {
-				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", time[i+1].Format("2006"))})
+				tick = append(tick, chart.Tick{Value: float64(i + 1), Label: fmt.Sprintf("%s", times[i+1].Format("2006"))})
 				grid = append(grid, chart.GridLine{Value: float64(i + 1)})
 			}
 		}
-		tick = append(tick, chart.Tick{Value: float64(len(time)), Label: ""})
+		tick = append(tick, chart.Tick{Value: float64(len(times)), Label: ""})
 	default:
 		panic("Unsupported duration parameter to plot stock chart")
 	}
@@ -190,8 +190,8 @@ func Plot(stock IFinance) {
 					StrokeColor: chart.GetDefaultColor(0),
 				},
 				XValues: func() []float64 {
-					xvalues := make([]float64, len(time))
-					for i := 0; i < len(time); i++ {
+					xvalues := make([]float64, len(times))
+					for i := 0; i < len(times); i++ {
 						xvalues[i] = float64(i)
 					}
 					return xvalues
