@@ -43,10 +43,10 @@ func main() {
 		finance.Plot(stock)
 	case "plots":
 		for _, duration := range durations {
-			log.Println("Plotting chart for " + finance.Durations[duration])
 			stock.GetChart(duration)
 			finance.Plot(stock)
 			time.Sleep(sleep * time.Millisecond)
+			log.Println("Plotting chart for " + finance.Durations[duration])
 		}
 	case "performance":
 		finance.Performance(stock)

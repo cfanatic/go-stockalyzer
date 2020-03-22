@@ -10,6 +10,7 @@ import (
 type keys int
 
 const (
+	PATH             = "cmd/stockalyzer/config.toml"
 	PATH_R           = "misc/config.toml"
 	PATH_D           = "../../misc/config.toml"
 	MARKETHOURS keys = iota
@@ -18,7 +19,7 @@ const (
 )
 
 var (
-	mode = flag.String("mode", "release", "define release or debug mode")
+	mode = flag.String("mode", PATH, "define execution mode")
 )
 
 type config struct {
@@ -40,10 +41,12 @@ func Get(key keys) interface{} {
 		conf config
 		path string
 	)
-	if flag.Parse(); *mode == "debug" {
+	if flag.Parse(); *mode == "release" {
+		path, _ = filepath.Abs(PATH_R)
+	} else if *mode == "debug" {
 		path, _ = filepath.Abs(PATH_D)
 	} else {
-		path, _ = filepath.Abs(PATH_R)
+		path, _ = filepath.Abs(*mode)
 	}
 	if _, err := toml.DecodeFile(path, &conf); err != nil {
 		panic(err)
