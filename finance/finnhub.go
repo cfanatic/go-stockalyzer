@@ -17,14 +17,11 @@ type Finnhub struct {
 }
 
 func NewFinnhub(symbol string) *Finnhub {
-	token := configuration.Get(configuration.FINNHUB_TOKEN).(string)
+	token := configuration.Token()
 	c := client.New(token)
-	return &Finnhub{client: *c, Finance: Finance{Ticker: symbol}, err: nil}
-}
-
-func (fh *Finnhub) GetProfile() *Profile {
 	p := Profile{}
-	if profile, err := fh.client.Stock.GetProfile(fh.Finance.Ticker); err == nil {
+	fh := Finnhub{client: *c, Finance: Finance{Ticker: symbol}, err: nil}
+	if profile, err := c.Stock.GetProfile(symbol); err == nil {
 		p.Country = profile.Country
 		p.Currency = profile.Currency
 		p.Description = profile.Description
@@ -33,11 +30,14 @@ func (fh *Finnhub) GetProfile() *Profile {
 		p.GICSSector = profile.GICSSector
 		p.ISIN = profile.ISIN
 		p.Name = profile.Name
+		if p.Name == "" {
+			p.Name = symbol
+		}
 		fh.Finance.Profile = &p
 	} else {
 		fh.err = err
 	}
-	return &p
+	return &fh
 }
 
 func (fh *Finnhub) GetQuote() *Quote {
@@ -100,8 +100,10 @@ func (fh *Finnhub) GetCandle(from, to string) *Candle {
 }
 
 func (fh *Finnhub) GetChart(duration Duration) *Candle {
-	var from, to string
-	var now, then time.Time
+	var (
+		from, to  string
+		now, then time.Time
+	)
 	now = time.Now()
 	switch duration {
 	case Intraday:
@@ -144,6 +146,13 @@ func (fh *Finnhub) Duration() *Duration {
 		panic(fh.err)
 	}
 	return &fh.Finance.Duration
+}
+
+func (fh *Finnhub) Profile() *Profile {
+	if fh.err != nil {
+		panic(fh.err)
+	}
+	return fh.Finance.Profile
 }
 
 func (fh *Finnhub) XValues() *[]time.Time {

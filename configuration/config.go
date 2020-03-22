@@ -10,17 +10,26 @@ import (
 type keys int
 
 const (
-	PATH_R             = "misc/config.toml"
-	PATH_D             = "../../misc/config.toml"
-	FINNHUB_TOKEN keys = iota
+	PATH             = "cmd/stockalyzer/config.toml"
+	PATH_R           = "misc/config.toml"
+	PATH_D           = "../../misc/config.toml"
+	MARKETHOURS keys = iota
+	CHARTSIZE
+	TOKEN
 )
 
 var (
-	mode = flag.String("mode", "release", "define release or debug mode")
+	mode = flag.String("mode", PATH, "define execution mode")
 )
 
 type config struct {
+	General general
 	Finnhub finnhub
+}
+
+type general struct {
+	MarketHours []int
+	ChartSize   []int
 }
 
 type finnhub struct {
@@ -32,18 +41,38 @@ func Get(key keys) interface{} {
 		conf config
 		path string
 	)
-	if flag.Parse(); *mode == "debug" {
+	if flag.Parse(); *mode == "release" {
+		path, _ = filepath.Abs(PATH_R)
+	} else if *mode == "debug" {
 		path, _ = filepath.Abs(PATH_D)
 	} else {
-		path, _ = filepath.Abs(PATH_R)
+		path, _ = filepath.Abs(*mode)
 	}
 	if _, err := toml.DecodeFile(path, &conf); err != nil {
 		panic(err)
 	}
 	switch key {
-	case FINNHUB_TOKEN:
+	case MARKETHOURS:
+		return conf.General.MarketHours
+	case CHARTSIZE:
+		return conf.General.ChartSize
+	case TOKEN:
 		return conf.Finnhub.Token
 	default:
 		return nil
 	}
+}
+
+func MarketHours() (int, int) {
+	tmp := Get(MARKETHOURS).([]int)
+	return tmp[0], tmp[1]
+}
+
+func ChartSize() (int, int) {
+	tmp := Get(CHARTSIZE).([]int)
+	return tmp[0], tmp[1]
+}
+
+func Token() string {
+	return Get(TOKEN).(string)
 }
